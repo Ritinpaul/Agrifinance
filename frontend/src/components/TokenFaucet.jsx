@@ -28,7 +28,7 @@ const TokenFaucet = ({ className = "" }) => {
     }
   }, []);
 
-  // Load in-app wallet balance
+  // Load AgriFinance wallet balance
   const loadInAppBalance = async () => {
     if (!user?.id) return;
     
@@ -37,13 +37,14 @@ const TokenFaucet = ({ className = "" }) => {
         .from('wallet_accounts')
         .select('balance_wei')
         .eq('user_id', user.id)
+        .eq('wallet_type', 'agrifinance')
         .single();
       
       if (walletAccount) {
         setInAppBalance(walletAccount.balance_wei || '0');
       }
     } catch (error) {
-      console.log('In-app wallet not available yet:', error);
+      console.log('AgriFinance wallet not available yet:', error);
       setInAppBalance('0');
     }
   };
@@ -70,27 +71,17 @@ const TokenFaucet = ({ className = "" }) => {
         return;
       }
 
-      // Get or create wallet account
+      // Get or create AgriFinance wallet account
       let { data: walletAccount } = await supabase
         .from('wallet_accounts')
         .select('*')
         .eq('user_id', user.id)
+        .eq('wallet_type', 'agrifinance')
         .single();
 
       if (!walletAccount) {
-        const { data: created } = await supabase
-          .from('wallet_accounts')
-          .insert([{
-            user_id: user.id,
-            address: null,
-            chain_id: 'amoy',
-            token_symbol: 'KRSI',
-            balance_wei: '0',
-            custodial: true
-          }])
-          .select()
-          .single();
-        walletAccount = created;
+        toast.error("Please create your AgriFinance wallet first");
+        return;
       }
 
       // Transfer tokens from MetaMask to in-app wallet (simulated)
@@ -353,12 +344,12 @@ const TokenFaucet = ({ className = "" }) => {
           </div>
         </div>
 
-        {/* In-App Wallet Balance */}
+        {/* AgriFinance Wallet Balance */}
         {user && (
           <div className="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 dark:text-blue-400">In-App Wallet Balance</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400">AgriFinance Wallet Balance</p>
                 <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
                   {formatTokenAmount(inAppBalance)} KRSI
                 </p>
@@ -374,12 +365,12 @@ const TokenFaucet = ({ className = "" }) => {
                     <span>Depositing...</span>
                   </div>
                 ) : (
-                  'Deposit to In-App Wallet'
+                  'Deposit to AgriFinance Wallet'
                 )}
               </button>
             </div>
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-              Transfer your MetaMask KRSI tokens to your in-app wallet for easy management
+              Transfer your MetaMask KRSI tokens to your AgriFinance wallet for easy management
             </p>
           </div>
         )}

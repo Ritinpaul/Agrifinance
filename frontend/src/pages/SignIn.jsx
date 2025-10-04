@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../context/SupabaseContext';
 import { useTheme } from '../context/ThemeContext';
+import { MobileWalletUtils } from '../utils/mobileWalletUtils';
 import toast from 'react-hot-toast';
 
 const SignIn = () => {
@@ -31,10 +32,17 @@ const SignIn = () => {
   }, [user, loading, navigate]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    
+    // Special handling for phone number with auto-formatting
+    if (name === 'phone') {
+      MobileWalletUtils.handlePhoneInputChange(e, setFormData);
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
 
   const handleSubmit = async (e) => {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSupabase } from '../context/SupabaseContext';
+import { MobileWalletUtils } from '../utils/mobileWalletUtils';
 import toast from 'react-hot-toast';
 import ProfileCompletion from '../components/ProfileCompletion';
 
@@ -23,8 +24,7 @@ const Profile = () => {
       const isProfileIncomplete = !userProfile.profile_completed || 
         !userProfile.first_name || 
         !userProfile.last_name || 
-        !userProfile.role || 
-        userProfile.role === 'user';
+        !userProfile.role;
       
       if (isProfileIncomplete) {
         setShowProfileCompletion(true);
@@ -34,11 +34,10 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Special handling for phone number with auto-formatting
     if (name === 'phone') {
-      // auto-prefix +91 if missing
-      const trimmed = value.replace(/\s+/g, '');
-      const withPrefix = trimmed.startsWith('+91') || trimmed.startsWith('+') ? trimmed : `+91${trimmed}`;
-      setForm((f) => ({ ...f, [name]: withPrefix }));
+      MobileWalletUtils.handlePhoneInputChange(e, setForm);
     } else {
       setForm((f) => ({ ...f, [name]: value }));
     }
@@ -128,8 +127,7 @@ const Profile = () => {
   const isProfileIncomplete = !userProfile?.profile_completed || 
     !userProfile?.first_name || 
     !userProfile?.last_name || 
-    !userProfile?.role || 
-    userProfile?.role === 'user';
+    !userProfile?.role;
 
   return (
     <>

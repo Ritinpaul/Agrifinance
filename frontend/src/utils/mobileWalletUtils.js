@@ -21,6 +21,56 @@ export class MobileWalletUtils {
     return cleaned;
   }
 
+  // Auto-format phone number input with +91 prefix - FIXED TO PREVENT DUPLICATES
+  static autoFormatPhoneInput(value) {
+    // If already has +91 prefix, don't add it again
+    if (value.includes('+91')) {
+      // Extract digits after +91
+      const afterPrefix = value.replace(/^\+91\s*/, '');
+      const cleanDigits = afterPrefix.replace(/\D/g, '');
+      
+      // Limit to 10 digits
+      const limitedDigits = cleanDigits.slice(0, 10);
+      return '+91 ' + limitedDigits;
+    }
+    
+    // Remove all non-digit characters
+    let digits = value.replace(/\D/g, '');
+    
+    // If empty, return empty
+    if (!digits) return '';
+    
+    // If starts with 91 and has 12 digits, format as +91
+    if (digits.startsWith('91') && digits.length === 12) {
+      return '+91 ' + digits.slice(2);
+    }
+    
+    // If has 10 digits, add +91 prefix
+    if (digits.length === 10) {
+      return '+91 ' + digits;
+    }
+    
+    // If starts with 91 and has more than 12 digits, keep only first 12
+    if (digits.startsWith('91') && digits.length > 12) {
+      return '+91 ' + digits.slice(2, 12);
+    }
+    
+    // For partial input, limit to 10 digits and add +91 prefix
+    const limitedDigits = digits.slice(0, 10);
+    return '+91 ' + limitedDigits;
+  }
+
+  // Handle phone input change with auto-formatting
+  static handlePhoneInputChange(event, setFormData) {
+    const { name, value } = event.target;
+    const formattedValue = this.autoFormatPhoneInput(value);
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: formattedValue
+    }));
+  }
+
   // Validate mobile number format
   static validateMobileNumber(phoneNumber) {
     const formatted = this.formatMobileWalletId(phoneNumber);
@@ -35,6 +85,11 @@ export class MobileWalletUtils {
   // Create mobile wallet for user
   static async createMobileWallet(userId, phoneNumber, displayName = null) {
     try {
+      // For now, return error since mobile wallet functionality is not fully implemented
+      console.log('Mobile wallet creation not yet implemented');
+      return { success: false, error: 'Mobile wallet functionality not yet implemented' };
+      
+      /* Original implementation - commented out until database schema is updated
       const validation = this.validateMobileNumber(phoneNumber);
       if (!validation.valid) {
         throw new Error(validation.error);
@@ -48,6 +103,7 @@ export class MobileWalletUtils {
 
       if (error) throw error;
       return { success: true, walletId: data };
+      */
     } catch (error) {
       console.error('Error creating mobile wallet:', error);
       return { success: false, error: error.message };
@@ -77,6 +133,11 @@ export class MobileWalletUtils {
   // Process mobile-to-mobile transfer
   static async transferMobileToMobile(fromMobile, toMobile, amount, description = null) {
     try {
+      // For now, return error since mobile wallet functionality is not fully implemented
+      console.log('Mobile transfer not yet implemented');
+      return { success: false, error: 'Mobile wallet functionality not yet implemented' };
+      
+      /* Original implementation - commented out until database schema is updated
       const fromValidation = this.validateMobileNumber(fromMobile);
       const toValidation = this.validateMobileNumber(toMobile);
       
@@ -105,6 +166,7 @@ export class MobileWalletUtils {
         transactionRef: data.replace('SUCCESS: ', ''),
         message: 'Transfer completed successfully'
       };
+      */
     } catch (error) {
       console.error('Error processing mobile transfer:', error);
       return { success: false, error: error.message };
@@ -114,6 +176,12 @@ export class MobileWalletUtils {
   // Get user's mobile wallets
   static async getUserMobileWallets(userId) {
     try {
+      // For now, return empty array since mobile wallet functionality is not fully implemented
+      // This prevents the loading from hanging
+      console.log('Mobile wallet functionality not yet implemented');
+      return { success: true, wallets: [] };
+      
+      /* Original implementation - commented out until database schema is updated
       const { data, error } = await supabase
         .from('wallet_accounts')
         .select('*')
@@ -124,6 +192,7 @@ export class MobileWalletUtils {
 
       if (error) throw error;
       return { success: true, wallets: data };
+      */
     } catch (error) {
       console.error('Error getting user mobile wallets:', error);
       return { success: false, error: error.message };

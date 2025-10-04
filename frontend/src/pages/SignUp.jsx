@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../context/SupabaseContext';
 import { useTheme } from '../context/ThemeContext';
+import { MobileWalletUtils } from '../utils/mobileWalletUtils';
 import toast from 'react-hot-toast';
 
 const SignUp = () => {
@@ -27,10 +28,16 @@ const SignUp = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    
+    // Special handling for phone number with auto-formatting
+    if (name === 'phone') {
+      MobileWalletUtils.handlePhoneInputChange(e, setFormData);
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value
+      });
+    }
   };
 
   const validateForm = () => {
