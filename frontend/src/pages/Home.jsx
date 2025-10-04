@@ -73,20 +73,20 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-green-600/5 to-blue-600/5 dark:from-green-600/10 dark:to-blue-600/10"></div>
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-8 sm:pb-12">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-white dark:bg-gray-800 rounded-full p-4 shadow-lg">
-                <span className="text-4xl">🌾</span>
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="bg-white dark:bg-gray-800 rounded-full p-3 sm:p-4 shadow-lg">
+                <span className="text-3xl sm:text-4xl">🌾</span>
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4 px-4">
               Welcome to <span className="text-green-600 dark:text-green-400">AgriFinance</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-6 max-w-3xl mx-auto font-medium">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 max-w-3xl mx-auto font-medium px-4">
               Blockchain-Powered Agricultural Supply Chain & DeFi Lending Platform
             </p>
-            <p className="text-base text-gray-500 dark:text-gray-500 mb-8 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-500 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4">
               Empowering farmers with zero-collateral loans, transparent supply chains, 
               AI-based credit scoring, and NFT land ownership verification.
             </p>
@@ -121,28 +121,28 @@ const Home = () => {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Link 
                 to="/farmer" 
-                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200"
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200 text-center"
               >
                 👨‍🌾 Farmer Dashboard
               </Link>
               <Link 
                 to="/lender" 
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200 text-center"
               >
                 💰 Lender Dashboard
               </Link>
               <Link 
                 to="/buyer" 
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200 text-center"
               >
                 🛒 Buyer Dashboard
               </Link>
               <button
                 onClick={() => setShowTour(true)}
-                className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200"
+                className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-200 text-center"
               >
                 🎯 Take Tour
               </button>
@@ -168,7 +168,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {features.map((feature, index) => (
               <Link
                 key={index}
@@ -202,7 +202,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {userTypes.map((userType, index) => (
               <Link
                 key={index}
@@ -244,7 +244,7 @@ const Home = () => {
               Trusted by thousands of farmers, lenders, and buyers worldwide
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-6 text-center shadow-sm">
               <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">$2.5M</div>
               <div className="text-gray-600 dark:text-gray-400 font-medium text-sm">Total Loans Disbursed</div>

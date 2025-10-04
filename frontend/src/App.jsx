@@ -17,6 +17,8 @@ import NFTMarketplace from './pages/NFTMarketplace';
 import ProductVerification from './pages/ProductVerification';
 import TokenFaucetPage from './pages/TokenFaucetPage';
 import Wallet from './pages/Wallet';
+import HybridWallet from './pages/HybridWallet';
+import DAOGovernance from './pages/DAOGovernance';
 import Staking from './pages/Staking';
 import TransactionHistory from './pages/TransactionHistory';
 import AdminDashboard from './pages/AdminDashboard';
@@ -71,6 +73,8 @@ const AppContent = () => {
               <Route path="/verify-product" element={<ProductVerification />} />
               <Route path="/token-faucet" element={<ProtectedRoute><TokenFaucetPage /></ProtectedRoute>} />
               <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+              <Route path="/hybrid-wallet" element={<ProtectedRoute><HybridWallet /></ProtectedRoute>} />
+              <Route path="/dao" element={<ProtectedRoute><DAOGovernance /></ProtectedRoute>} />
               <Route path="/staking" element={<ProtectedRoute><Staking /></ProtectedRoute>} />
               <Route path="/transactions" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute>} />

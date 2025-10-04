@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSupabase } from '../context/SupabaseContext';
 import AuthModal from './AuthModal';
 import ServicesDropdown from './ServicesDropdown';
+import DigitalAssetsDropdown from './DigitalAssetsDropdown';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
@@ -14,6 +15,7 @@ const Navbar = () => {
   const { user, session, userProfile, signOut, loading } = useSupabase();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [forceRefresh, setForceRefresh] = useState(0);
   
   // Force refresh when user state changes
@@ -40,13 +42,21 @@ const Navbar = () => {
             <div className="w-8 h-8 bg-green-600 dark:bg-green-500 rounded-lg flex items-center justify-center">
               <span className="text-white text-sm">🌾</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              AgriFinance
-            </span>
+            <div className="hidden sm:block">
+              <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+                AgriFinance
+              </span>
+            </div>
+            <div className="sm:hidden">
+              <div className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                <div>Agri</div>
+                <div>Finance</div>
+              </div>
+            </div>
           </Link>
 
-          {/* Navigation Links - Desktop */}
-          <div className="hidden lg:flex items-center space-x-8 flex-1 justify-center">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-6 flex-1 justify-center">
             <Link 
               to="/" 
               className={`text-sm font-medium transition-colors ${
@@ -98,20 +108,21 @@ const Navbar = () => {
             >
               Token Faucet
             </Link>
-            <Link 
-              to="/docs" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/docs') 
-                  ? 'text-green-600 dark:text-green-400' 
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
-              }`}
-            >
-              Docs
-            </Link>
+                   <DigitalAssetsDropdown />
+                   <Link 
+                     to="/docs" 
+                     className={`text-sm font-medium transition-colors ${
+                       isActive('/docs') 
+                         ? 'text-green-600 dark:text-green-400' 
+                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                     }`}
+                   >
+                     Docs
+                   </Link>
           </div>
 
-          {/* Right side actions */}
-          <div className="flex items-center space-x-4 shrink-0">
+          {/* Right side actions - Desktop */}
+          <div className="hidden lg:flex items-center space-x-3 shrink-0">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -164,27 +175,19 @@ const Navbar = () => {
                     <button
                       onClick={async () => {
                         try {
-                          // Close menu immediately
                           setOpenUserMenu(false);
-                          
-                          // Show immediate feedback
                           toast.success('Signing out...');
-                          
-                          // Perform sign out
                           const { error } = await signOut();
                           if (error) {
                             toast.error(error.message || 'Failed to sign out');
                             return;
                           }
-                          
-                          // Force page reload to ensure clean state
                           setTimeout(() => {
                             window.location.href = '/signin';
                           }, 500);
                         } catch (error) {
                           toast.error('Failed to sign out');
                           console.error('Sign out error:', error);
-                          // Still redirect to signin page
                           setTimeout(() => {
                             window.location.href = '/signin';
                           }, 500);
@@ -201,13 +204,13 @@ const Navbar = () => {
               <div className="flex items-center space-x-2">
                 <Link 
                   to="/signin" 
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link 
                   to="/signup" 
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                 >
                   Sign Up
                 </Link>
@@ -232,31 +235,254 @@ const Navbar = () => {
               <button
                 onClick={connectWallet}
                 disabled={isLoading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Connecting...' : 'Connect Wallet'}
               </button>
             )}
           </div>
+
+          {/* Mobile menu button */}
+          <div className="lg:hidden flex items-center space-x-2">
+            {/* Theme Toggle - Mobile */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              {theme === 'light' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Mobile Auth/Wallet */}
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2">
+                <Link to="/profile" className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Link>
+                <button
+                  onClick={async () => {
+                    try {
+                      toast.success('Signing out...');
+                      const { error } = await signOut();
+                      if (error) {
+                        toast.error(error.message || 'Failed to sign out');
+                        return;
+                      }
+                      setTimeout(() => {
+                        window.location.href = '/signin';
+                      }, 500);
+                    } catch (error) {
+                      toast.error('Failed to sign out');
+                      setTimeout(() => {
+                        window.location.href = '/signin';
+                      }, 500);
+                    }
+                  }}
+                  className="p-2 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1">
+                <Link to="/signin" className="px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Sign In
+                </Link>
+                <Link to="/signup" className="px-2 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile Wallet */}
+            {isConnected ? (
+              <button
+                onClick={disconnectWallet}
+                className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                title="Disconnect Wallet"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={connectWallet}
+                disabled={isLoading}
+                className="p-2 rounded-md text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+                title="Connect Wallet"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </button>
+            )}
+
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden pb-3 space-y-1">
-          <Link to="/" className={`block px-3 py-2 rounded-md text-sm ${isActive('/') ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'}`}>Home</Link>
-          <div className="px-3">
-            <div className="text-sm font-medium mb-1">Services</div>
-            <div className="ml-4 space-y-1">
-              <Link to="/farmer" className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Farmer Dashboard</Link>
-              <Link to="/lender" className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Lender Dashboard</Link>
-              <Link to="/buyer" className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Buyer Dashboard</Link>
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 py-4">
+            <div className="space-y-1">
+              <Link 
+                to="/" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/') 
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Home
+              </Link>
+              
+              {/* Services Dropdown for Mobile */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Services</div>
+                <div className="ml-4 space-y-1">
+                  <Link 
+                    to="/farmer" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Farmer Dashboard
+                  </Link>
+                  <Link 
+                    to="/lender" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Lender Dashboard
+                  </Link>
+                  <Link 
+                    to="/buyer" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Buyer Dashboard
+                  </Link>
+                </div>
+              </div>
+
+              <Link 
+                to="/supply-chain" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/supply-chain') 
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Supply Chain
+              </Link>
+              <Link 
+                to="/nft-marketplace" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/nft-marketplace') 
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                NFT Marketplace
+              </Link>
+              <Link 
+                to="/verify-product" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/verify-product') 
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Verify Product
+              </Link>
+              <Link 
+                to="/token-faucet" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/token-faucet') 
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Token Faucet
+              </Link>
+              {/* Digital Assets Section */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Digital Assets</div>
+                <div className="ml-4 space-y-1">
+                  <Link 
+                    to="/hybrid-wallet" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    💳 Wallet
+                  </Link>
+                  <Link 
+                    to="/staking" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    🥩 Staking
+                  </Link>
+                  <Link 
+                    to="/dao" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    🏛️ DAO
+                  </Link>
+                  <Link 
+                    to="/transactions" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    📊 Transactions
+                  </Link>
+                </div>
+              </div>
+              <Link 
+                to="/docs" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/docs') 
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Docs
+              </Link>
             </div>
           </div>
-          <Link to="/supply-chain" className={`block px-3 py-2 rounded-md text-sm ${isActive('/supply-chain') ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'}`}>Supply Chain</Link>
-          <Link to="/nft-marketplace" className={`block px-3 py-2 rounded-md text-sm ${isActive('/nft-marketplace') ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'}`}>NFT Marketplace</Link>
-          <Link to="/verify-product" className={`block px-3 py-2 rounded-md text-sm ${isActive('/verify-product') ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'}`}>Verify Product</Link>
-          <Link to="/token-faucet" className={`block px-3 py-2 rounded-md text-sm ${isActive('/token-faucet') ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'}`}>Token Faucet</Link>
-          <Link to="/docs" className={`block px-3 py-2 rounded-md text-sm ${isActive('/docs') ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'}`}>Docs</Link>
-        </div>
+        )}
       </div>
     </nav>
   );

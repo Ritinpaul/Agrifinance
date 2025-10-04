@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useWeb3 } from '../context/Web3Context';
+import { useSupabase } from '../context/SupabaseContext';
 import { ethers } from 'ethers';
 import { toast } from 'react-hot-toast';
 
 const TokenFaucet = ({ className = "" }) => {
   const { account, contract, krishiTokenContract } = useWeb3();
+  const { supabase, user } = useSupabase();
   const [loading, setLoading] = useState(false);
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [inAppBalance, setInAppBalance] = useState('0');
   const [faucetData, setFaucetData] = useState({
     balance: '0', // wei string
     lastClaim: 0,
@@ -24,12 +28,116 @@ const TokenFaucet = ({ className = "" }) => {
     }
   }, []);
 
-  // Load faucet data
-  useEffect(() => {
-    if (account && krishiTokenContract) {
-      loadFaucetData();
+  // Load in-app wallet balance
+  const loadInAppBalance = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data: walletAccount } = await supabase
+        .from('wallet_accounts')
+        .select('balance_wei')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (walletAccount) {
+        setInAppBalance(walletAccount.balance_wei || '0');
+      }
+    } catch (error) {
+      console.log('In-app wallet not available yet:', error);
+      setInAppBalance('0');
     }
-  }, [account, krishiTokenContract]);
+  };
+
+  // Deposit KRSI tokens to in-app wallet
+  const depositToInAppWallet = async () => {
+    if (!user?.id || !account) {
+      toast.error("Please connect your wallet and sign in");
+      return;
+    }
+
+    if (!krishiTokenContract) {
+      toast.error("KRSI token contract not available");
+      return;
+    }
+
+    setDepositLoading(true);
+    
+    try {
+      // Check MetaMask balance
+      const metaMaskBalance = await krishiTokenContract.balanceOf(account);
+      if (metaMaskBalance === 0n) {
+        toast.error("No KRSI tokens in MetaMask to deposit");
+        return;
+      }
+
+      // Get or create wallet account
+      let { data: walletAccount } = await supabase
+        .from('wallet_accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!walletAccount) {
+        const { data: created } = await supabase
+          .from('wallet_accounts')
+          .insert([{
+            user_id: user.id,
+            address: null,
+            chain_id: 'amoy',
+            token_symbol: 'KRSI',
+            balance_wei: '0',
+            custodial: true
+          }])
+          .select()
+          .single();
+        walletAccount = created;
+      }
+
+      // Transfer tokens from MetaMask to in-app wallet (simulated)
+      // In a real implementation, this would involve a smart contract transfer
+      const depositAmount = metaMaskBalance.toString();
+      
+      // Update in-app wallet balance
+      const newBalance = (BigInt(walletAccount.balance_wei || '0') + BigInt(depositAmount)).toString();
+      
+      const { error: updateError } = await supabase
+        .from('wallet_accounts')
+        .update({ balance_wei: newBalance })
+        .eq('id', walletAccount.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Record transaction
+      await supabase
+        .from('wallet_transactions')
+        .insert([{
+          user_id: user.id,
+          wallet_id: walletAccount.id,
+          direction: 'in',
+          amount_wei: depositAmount,
+          token_symbol: 'KRSI',
+          status: 'completed',
+          metadata: { 
+            type: 'deposit_from_metamask',
+            from_address: account,
+            amount_display: formatTokenAmount(depositAmount)
+          }
+        }]);
+
+      // Update local state
+      setInAppBalance(newBalance);
+      
+      toast.success(`Successfully deposited ${formatTokenAmount(depositAmount)} KRSI to in-app wallet!`);
+      
+    } catch (error) {
+      console.error("Deposit error:", error);
+      toast.error("Failed to deposit tokens to in-app wallet");
+    } finally {
+      setDepositLoading(false);
+    }
+  };
 
   // Load faucet data from contract
   const loadFaucetData = async () => {
@@ -51,6 +159,16 @@ const TokenFaucet = ({ className = "" }) => {
       console.error("Error loading faucet data:", error);
     }
   };
+
+  // Load faucet data and in-app balance
+  useEffect(() => {
+    if (account && krishiTokenContract) {
+      loadFaucetData();
+    }
+    if (user?.id) {
+      loadInAppBalance();
+    }
+  }, [account, krishiTokenContract, user]);
 
   // Check if user can claim tokens
   const canClaim = () => {
@@ -234,6 +352,37 @@ const TokenFaucet = ({ className = "" }) => {
             </button>
           </div>
         </div>
+
+        {/* In-App Wallet Balance */}
+        {user && (
+          <div className="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-600 dark:text-blue-400">In-App Wallet Balance</p>
+                <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                  {formatTokenAmount(inAppBalance)} KRSI
+                </p>
+              </div>
+              <button
+                onClick={depositToInAppWallet}
+                disabled={depositLoading || !account || !krishiTokenContract}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+              >
+                {depositLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Depositing...</span>
+                  </div>
+                ) : (
+                  'Deposit to In-App Wallet'
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+              Transfer your MetaMask KRSI tokens to your in-app wallet for easy management
+            </p>
+          </div>
+        )}
 
         {/* Claim Section */}
         <div className="mb-6">

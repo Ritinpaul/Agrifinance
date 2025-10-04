@@ -16,6 +16,7 @@ const SignIn = () => {
   const [usePhoneOtp, setUsePhoneOtp] = useState(false);
   const [useEmailMagic, setUseEmailMagic] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { theme, isDark } = useTheme();
   const navigate = useNavigate();
   const devOtpCode = import.meta.env.VITE_DEV_OTP_CODE || '';
@@ -153,33 +154,33 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mx-auto h-12 w-12 sm:h-16 sm:w-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+            <svg className="h-6 w-6 sm:h-8 sm:w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Welcome Back
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 px-4">
             Sign in to your AgriFinance account
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
+        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-4 sm:p-6 lg:p-8">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="flex items-center justify-center">
-              <div className="inline-flex items-center bg-gray-100 dark:bg-gray-700 rounded-md p-1">
-                <button type="button" onClick={() => { setUsePhoneOtp(false); setUseEmailMagic(false); }} className={`px-3 py-1 rounded ${(!usePhoneOtp && !useEmailMagic) ? 'bg-white dark:bg-gray-800 shadow' : ''}`}>
+              <div className="inline-flex flex-col sm:flex-row items-center bg-gray-100 dark:bg-gray-700 rounded-md p-1 space-y-1 sm:space-y-0 sm:space-x-1">
+                <button type="button" onClick={() => { setUsePhoneOtp(false); setUseEmailMagic(false); }} className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm ${(!usePhoneOtp && !useEmailMagic) ? 'bg-white dark:bg-gray-800 shadow' : ''}`}>
                   Email & Password
                 </button>
-                <button type="button" onClick={() => { setUsePhoneOtp(true); setUseEmailMagic(false); }} className={`px-3 py-1 rounded ${usePhoneOtp ? 'bg-white dark:bg-gray-800 shadow' : ''}`}>
+                <button type="button" onClick={() => { setUsePhoneOtp(true); setUseEmailMagic(false); }} className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm ${usePhoneOtp ? 'bg-white dark:bg-gray-800 shadow' : ''}`}>
                   Phone OTP
                 </button>
-                <button type="button" onClick={() => { setUsePhoneOtp(false); setUseEmailMagic(true); }} className={`px-3 py-1 rounded ${useEmailMagic ? 'bg-white dark:bg-gray-800 shadow' : ''}`}>
+                <button type="button" onClick={() => { setUsePhoneOtp(false); setUseEmailMagic(true); }} className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm ${useEmailMagic ? 'bg-white dark:bg-gray-800 shadow' : ''}`}>
                   Email Magic Link
                 </button>
               </div>
@@ -199,7 +200,7 @@ const SignIn = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors text-sm sm:text-base"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -214,7 +215,7 @@ const SignIn = () => {
                       type="text"
                       value={formData.otp}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors text-sm sm:text-base"
                       placeholder="Enter dev code if provided"
                     />
                   </div>
@@ -234,7 +235,7 @@ const SignIn = () => {
                     required
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors text-sm sm:text-base"
                     placeholder="e.g. +919876543210"
                   />
                 </div>
@@ -251,7 +252,7 @@ const SignIn = () => {
                       required={!devOtpCode}
                       value={formData.otp}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors text-sm sm:text-base"
                       placeholder="6-digit code"
                     />
                   </div>
@@ -280,17 +281,35 @@ const SignIn = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
-                placeholder="Enter your password"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors text-sm sm:text-base"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
               </>
             )}
