@@ -10,44 +10,104 @@ const Documentation = () => {
     { id: 'farmer-guide', title: 'Farmer Guide', icon: '👨‍🌾' },
     { id: 'lender-guide', title: 'Lender Guide', icon: '💰' },
     { id: 'buyer-guide', title: 'Buyer Guide', icon: '🛒' },
-    { id: 'features', title: 'Features', icon: '⚡' },
+    { id: 'features', title: 'Core Features', icon: '⚡' },
+    { id: 'innovation', title: 'Technical Innovation', icon: '🔬' },
+    { id: 'impact', title: 'Social Impact', icon: '🌍' },
+    { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
     { id: 'faq', title: 'FAQ', icon: '❓' }
   ];
 
   const renderOverview = () => (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-          🌾 Welcome to AgriFinance Documentation
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          🌾 AgriFinance: Revolutionizing Agriculture with Blockchain & AI
         </h2>
-        <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-          AgriFinance is a blockchain-powered platform that helps farmers get loans without traditional collateral, 
-          tracks agricultural products from farm to market, and connects farmers with lenders and buyers. 
-          This documentation will help you understand how to use our platform effectively.
+        <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-4">
+          AgriFinance is a cutting-edge blockchain-powered platform that democratizes agricultural finance, 
+          eliminates traditional barriers to credit, and creates transparent supply chains. Built for the 
+          hackathon challenge, we're transforming how farmers access capital, track produce, and connect with markets.
         </p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">🏆 Hackathon Innovation Highlights</h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">✓</span>
+              <span className="text-gray-600 dark:text-gray-400">Zero-collateral DeFi lending with blockchain verification</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">✓</span>
+              <span className="text-gray-600 dark:text-gray-400">Hybrid blockchain-database transaction system</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">✓</span>
+              <span className="text-gray-600 dark:text-gray-400">NFT land ownership verification</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">✓</span>
+              <span className="text-gray-600 dark:text-gray-400">Complete supply chain traceability</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-6 shadow-sm border border-green-200 dark:border-green-800">
           <div className="text-3xl mb-3">👨‍🌾</div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">For Farmers</h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Get loans without traditional collateral, track your crops, and sell directly to buyers.
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+            Access instant loans without collateral, track your crops with blockchain technology, 
+            and sell directly to verified buyers with complete transparency.
           </p>
+          <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+            🚀 No traditional banks needed • 💰 Instant loan approval • 📱 Mobile-friendly
+          </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 shadow-sm border border-blue-200 dark:border-blue-800">
           <div className="text-3xl mb-3">💰</div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">For Lenders</h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Provide loans to farmers and earn returns while supporting agriculture.
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+            Provide liquidity to farmers with AI-powered risk assessment, earn competitive returns, 
+            and support sustainable agriculture while building a diversified portfolio.
           </p>
+          <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+            🤖 AI risk analysis • 📊 Real-time portfolio tracking • 🌱 Impact investing
+          </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-6 shadow-sm border border-purple-200 dark:border-purple-800">
           <div className="text-3xl mb-3">🛒</div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">For Buyers</h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Buy verified agricultural products with complete traceability.
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+            Purchase verified agricultural products with complete traceability from farm to table, 
+            ensuring quality, authenticity, and supporting sustainable farming practices.
           </p>
+          <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+            🔍 QR code verification • 📦 Complete traceability • 🌾 Direct farmer connection
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg p-6 border border-orange-200 dark:border-orange-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">🎯 Problem We're Solving</h3>
+        <div className="grid md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Traditional Challenges:</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Farmers lack collateral for loans</li>
+              <li>• Supply chains lack transparency</li>
+              <li>• Credit scoring is biased</li>
+              <li>• Middlemen reduce farmer profits</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Our Solution:</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Blockchain-based loan verification</li>
+              <li>• Blockchain supply chain tracking</li>
+              <li>• NFT land ownership verification</li>
+              <li>• Direct farmer-buyer connections</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -74,16 +134,30 @@ const Documentation = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step 2: Connect Your Wallet
+            Step 2: Choose Your Wallet Option
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Connect your MetaMask wallet to interact with blockchain features like loans and NFTs.
+            You have two options to access blockchain features like loans and NFTs:
           </p>
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <p className="text-blue-800 dark:text-blue-300 text-sm">
-              <strong>Note:</strong> You need MetaMask wallet installed in your browser. 
-              Download it from <a href="https://metamask.io" target="_blank" rel="noopener noreferrer" className="underline">metamask.io</a>
-            </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">🦊 MetaMask Wallet</h4>
+              <p className="text-blue-700 dark:text-blue-400 text-sm mb-2">
+                Connect your existing MetaMask wallet for full blockchain features.
+              </p>
+              <a href="https://metamask.io" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 text-xs underline">
+                Download MetaMask →
+              </a>
+            </div>
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">🏦 In-App Wallet</h4>
+              <p className="text-green-700 dark:text-green-400 text-sm mb-2">
+                Use our built-in wallet - no external software needed!
+              </p>
+              <Link to="/hybrid-wallet" className="text-green-600 dark:text-green-400 text-xs underline">
+                Try In-App Wallet →
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -122,7 +196,7 @@ const Documentation = () => {
             💰 Applying for Loans
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Get agricultural loans without traditional collateral using our AI-powered credit scoring system.
+            Get agricultural loans without traditional collateral using our blockchain-based verification system.
           </p>
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
@@ -131,7 +205,7 @@ const Documentation = () => {
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-500 mt-1">✓</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">AI analyzes your farming history and yield data</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Blockchain verifies your farming history and land ownership</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-500 mt-1">✓</span>
@@ -177,7 +251,7 @@ const Documentation = () => {
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-purple-500 mt-1">📈</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Improve your credit score</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Improve your loan eligibility</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-purple-500 mt-1">🔒</span>
@@ -188,23 +262,23 @@ const Documentation = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            🤖 Credit Score Monitoring
+            📊 Loan History Tracking
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Monitor your AI-powered credit score based on farming performance, loan history, and land ownership.
+            Track your loan applications, approvals, and repayment history to build a strong financial profile.
           </p>
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-orange-500 mt-1">📊</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Real-time credit score updates</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Real-time loan status updates</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-orange-500 mt-1">📈</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Track factors affecting your score</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Track repayment progress</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-orange-500 mt-1">💡</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Get tips to improve your score</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">View loan history and performance</span>
             </div>
           </div>
         </div>
@@ -229,7 +303,7 @@ const Documentation = () => {
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-green-500 mt-1">✓</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">View farmer's credit score and history</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">View farmer's loan history and land ownership</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-500 mt-1">✓</span>
@@ -373,80 +447,405 @@ const Documentation = () => {
   const renderFeatures = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        ⚡ Platform Features
+        ⚡ Core Platform Features
       </h2>
       
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-6 shadow-sm border border-green-200 dark:border-green-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
             💰 Zero Collateral DeFi Lending
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            Get agricultural loans without traditional collateral using blockchain technology and AI credit scoring.
+            Revolutionary lending system using blockchain verification and NFT land ownership. No traditional collateral required.
           </p>
+          <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-2">
+            🚀 Instant approval • 🔒 Blockchain verified • 💎 DeFi protocol
+          </div>
           <Link to="/farmer" className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
             Learn More →
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 shadow-sm border border-blue-200 dark:border-blue-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
             📦 Blockchain Supply Chain
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            Track agricultural products from farm to market with complete transparency and immutability.
+            Complete traceability from farm to table with immutable blockchain records and QR code verification.
           </p>
-          <Link to="/supply-chain" className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
+          <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-2">
+            🔍 QR verification • 📊 Real-time tracking • 🔒 Immutable records
+          </div>
+          <Link to="/supply-chain" className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline">
             Learn More →
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-6 shadow-sm border border-purple-200 dark:border-purple-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            🤖 AI Credit Scoring
+            🔍 Blockchain Verification
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            Fair credit assessments based on yield data, sales history, weather patterns, and farming practices.
+            Secure, transparent verification system using blockchain technology for land ownership and farming data validation.
           </p>
-          <Link to="/farmer" className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
+          <div className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-2">
+            🔒 Immutable records • 📊 Data validation • 🌾 Farming verification
+          </div>
+          <Link to="/farmer" className="text-purple-600 dark:text-purple-400 text-sm font-medium hover:underline">
             Learn More →
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg p-6 shadow-sm border border-orange-200 dark:border-orange-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
             🧾 NFT Land Ownership
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            Convert land ownership into NFTs to improve creditworthiness and prove ownership securely.
+            Convert land ownership into NFTs for improved creditworthiness and secure ownership verification.
           </p>
-          <Link to="/nft-marketplace" className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
+          <div className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-2">
+            🏞️ Land NFTs • 📈 Credit boost • 🔐 Secure ownership
+          </div>
+          <Link to="/nft-marketplace" className="text-orange-600 dark:text-orange-400 text-sm font-medium hover:underline">
             Learn More →
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg p-6 shadow-sm border border-indigo-200 dark:border-indigo-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            🔍 Product Verification
+            🏦 Hybrid Wallet System
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            Verify product authenticity and quality using QR codes and blockchain verification.
+            Seamless integration between MetaMask and in-app wallet for maximum accessibility and user convenience.
           </p>
-          <Link to="/verify-product" className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
+          <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-2">
+            🦊 MetaMask support • 🏦 In-app wallet • 🔄 Seamless sync
+          </div>
+          <Link to="/hybrid-wallet" className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">
             Learn More →
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-lg p-6 shadow-sm border border-pink-200 dark:border-pink-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            🚰 Token Faucet
+            🎯 DAO Governance
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            Get free test tokens to explore platform features without spending real money.
+            Decentralized governance system allowing community-driven decisions on platform development and policies.
           </p>
-          <Link to="/token-faucet" className="text-green-600 dark:text-green-400 text-sm font-medium hover:underline">
+          <div className="text-xs text-pink-600 dark:text-pink-400 font-medium mb-2">
+            🗳️ Community voting • 📋 Proposal system • 🌐 Decentralized
+          </div>
+          <Link to="/dao" className="text-pink-600 dark:text-pink-400 text-sm font-medium hover:underline">
             Learn More →
           </Link>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderInnovation = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        🔬 Technical Innovation
+      </h2>
+      
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🏆 Hackathon Innovation Highlights</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">🚀 Blockchain Innovations</h4>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li className="flex items-start space-x-2">
+                <span className="text-green-500 mt-1">✓</span>
+                <span><strong>Hybrid Transaction System:</strong> Seamless blockchain-database synchronization</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-green-500 mt-1">✓</span>
+                <span><strong>Smart Contract Integration:</strong> Automated loan processing and NFT minting</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-green-500 mt-1">✓</span>
+                <span><strong>Gasless Transactions:</strong> Reduced blockchain costs for farmers</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-green-500 mt-1">✓</span>
+                <span><strong>Multi-Chain Support:</strong> Polygon network for scalability</span>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">🔍 Blockchain Verification</h4>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li className="flex items-start space-x-2">
+                <span className="text-blue-500 mt-1">✓</span>
+                <span><strong>Land Ownership Verification:</strong> NFT-based property validation</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-blue-500 mt-1">✓</span>
+                <span><strong>Supply Chain Tracking:</strong> Immutable product journey records</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-blue-500 mt-1">✓</span>
+                <span><strong>Transaction Verification:</strong> Blockchain-based loan processing</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-blue-500 mt-1">✓</span>
+                <span><strong>Data Integrity:</strong> Tamper-proof farming records</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            🔧 Technical Stack
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Frontend</h4>
+              <p className="text-gray-600 dark:text-gray-400">React.js, Tailwind CSS, Ethers.js, React Router</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Backend</h4>
+              <p className="text-gray-600 dark:text-gray-400">Node.js, Express.js, PostgreSQL, JWT Authentication</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Blockchain</h4>
+              <p className="text-gray-600 dark:text-gray-400">Solidity, Hardhat, Polygon Network, MetaMask</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Database</h4>
+              <p className="text-gray-600 dark:text-gray-400">NeonDB (PostgreSQL), Redis caching</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            🛡️ Security Features
+          </h3>
+          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">🔒</span>
+              <span>End-to-end encryption for sensitive data</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">🔐</span>
+              <span>JWT-based authentication system</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">🛡️</span>
+              <span>Smart contract security audits</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">🔍</span>
+              <span>Multi-layer verification system</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-green-500">📊</span>
+              <span>Real-time transaction monitoring</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderImpact = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        🌍 Social Impact & Sustainability
+      </h2>
+      
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6 border border-green-200 dark:border-green-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🎯 Our Mission</h3>
+        <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-4">
+          AgriFinance is designed to democratize agricultural finance and create sustainable, transparent supply chains 
+          that benefit farmers, consumers, and the environment. We're building a more equitable agricultural ecosystem.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-6 shadow-sm border border-green-200 dark:border-green-800">
+          <div className="text-3xl mb-3">👨‍🌾</div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Farmer Empowerment</h3>
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <li>• Access to credit without traditional collateral</li>
+            <li>• Direct market access bypassing middlemen</li>
+            <li>• Fair pricing through transparent transactions</li>
+            <li>• Land ownership verification and protection</li>
+            <li>• Financial inclusion for underserved communities</li>
+          </ul>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-6 shadow-sm border border-blue-200 dark:border-blue-800">
+          <div className="text-3xl mb-3">🌱</div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Environmental Impact</h3>
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <li>• Reduced food waste through better tracking</li>
+            <li>• Support for sustainable farming practices</li>
+            <li>• Carbon footprint reduction in supply chains</li>
+            <li>• Incentivizing organic and eco-friendly methods</li>
+            <li>• Transparent environmental impact reporting</li>
+          </ul>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-6 shadow-sm border border-purple-200 dark:border-purple-800">
+          <div className="text-3xl mb-3">🏘️</div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Community Benefits</h3>
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <li>• Strengthened rural economies</li>
+            <li>• Job creation in agricultural tech</li>
+            <li>• Knowledge sharing and education</li>
+            <li>• Community-driven governance</li>
+            <li>• Reduced inequality in agricultural access</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg p-6 border border-orange-200 dark:border-orange-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">📊 Impact Metrics & Goals</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Short-term Goals (6 months)</h4>
+            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <li>• Onboard 1,000+ farmers to the platform</li>
+              <li>• Process $1M+ in agricultural loans</li>
+              <li>• Track 10,000+ product batches</li>
+              <li>• Reduce loan processing time by 80%</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Long-term Vision (2 years)</h4>
+            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <li>• Serve 100,000+ farmers globally</li>
+              <li>• Process $100M+ in agricultural finance</li>
+              <li>• Create 1M+ verified product records</li>
+              <li>• Reduce food waste by 30%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderArchitecture = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        🏗️ System Architecture
+      </h2>
+      
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-indigo-200 dark:border-indigo-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🔄 Hybrid Blockchain Architecture</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          Our innovative hybrid system combines the security of blockchain with the efficiency of traditional databases, 
+          ensuring both transparency and scalability for agricultural applications.
+        </p>
+        <div className="grid md:grid-cols-3 gap-4 text-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">🔗 Blockchain Layer</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Smart contracts for loans & NFTs</li>
+              <li>• Immutable transaction records</li>
+              <li>• Decentralized governance</li>
+              <li>• Cryptocurrency transactions</li>
+            </ul>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">💾 Database Layer</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• User profiles & preferences</li>
+              <li>• Supply chain tracking data</li>
+              <li>• Analytics & reporting</li>
+              <li>• Fast query performance</li>
+            </ul>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">🔄 Sync Layer</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Real-time synchronization</li>
+              <li>• Conflict resolution</li>
+              <li>• Data integrity checks</li>
+              <li>• Automated reconciliation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            🏛️ Smart Contracts
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">KrishiToken (KRSI)</h4>
+              <p className="text-gray-600 dark:text-gray-400">ERC-20 token with staking, governance, and burning capabilities</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">LoanContract</h4>
+              <p className="text-gray-600 dark:text-gray-400">Automated loan processing and repayment management</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">NFTLand</h4>
+              <p className="text-gray-600 dark:text-gray-400">ERC-721 NFTs for land ownership verification</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">AgriFinanceDAO</h4>
+              <p className="text-gray-600 dark:text-gray-400">Governance token for community-driven decisions</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            🗄️ Database Schema
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">User Management</h4>
+              <p className="text-gray-600 dark:text-gray-400">Users, farmer_profiles, wallet_accounts</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Financial Data</h4>
+              <p className="text-gray-600 dark:text-gray-400">farmer_loans, wallet_transactions</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Supply Chain</h4>
+              <p className="text-gray-600 dark:text-gray-400">farmer_batches, nfts, supply_chain_events</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Governance</h4>
+              <p className="text-gray-600 dark:text-gray-400">dao_proposals, dao_votes, agricultural_metrics</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🚀 Scalability & Performance</h3>
+        <div className="grid md:grid-cols-2 gap-6 text-sm">
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Performance Optimizations</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Database indexing for fast queries</li>
+              <li>• Caching layer for frequently accessed data</li>
+              <li>• Optimized smart contract gas usage</li>
+              <li>• CDN for static asset delivery</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Scalability Features</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Microservices architecture</li>
+              <li>• Horizontal scaling capabilities</li>
+              <li>• Load balancing and failover</li>
+              <li>• Multi-region deployment support</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -466,7 +865,7 @@ const Documentation = () => {
           <p className="text-gray-600 dark:text-gray-400">
             AgriFinance is a blockchain-powered platform that helps farmers get loans without traditional collateral, 
             tracks agricultural products from farm to market, and connects farmers with lenders and buyers using 
-            AI-powered credit scoring and NFT land ownership verification.
+            blockchain verification and NFT land ownership validation.
           </p>
         </div>
 
@@ -475,8 +874,8 @@ const Documentation = () => {
             How do I get a loan as a farmer?
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Farmers can apply for loans through the Farmer Dashboard. Our AI system analyzes your farming history, 
-            yield data, and land ownership to determine your creditworthiness. No traditional collateral is required.
+            Farmers can apply for loans through the Farmer Dashboard. Our blockchain-based system verifies your 
+            land ownership through NFTs and farming data to determine loan eligibility. No traditional collateral is required.
           </p>
         </div>
 
@@ -486,7 +885,7 @@ const Documentation = () => {
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
             A land NFT (Non-Fungible Token) is a digital certificate that proves your ownership of agricultural land. 
-            It's stored on the blockchain and can improve your credit score, making it easier to get loans.
+            It's stored on the blockchain and can be used for loan verification, making it easier to get loans without traditional collateral.
           </p>
         </div>
 
@@ -515,8 +914,32 @@ const Documentation = () => {
             What if I don't have a MetaMask wallet?
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            You can still create an account and explore most features without a wallet. However, to access 
-            blockchain features like loans and NFTs, you'll need to install MetaMask wallet in your browser.
+            No problem! You can use our built-in in-app wallet instead. It provides the same blockchain features 
+            without requiring external software. You can also install MetaMask later if you prefer. Both options 
+            give you full access to loans, NFTs, and other blockchain features.
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            How does the hybrid blockchain system work?
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Our hybrid system combines blockchain security with database efficiency. Important transactions 
+            (like loans and NFT minting) are recorded on the blockchain for transparency, while detailed data 
+            (like user profiles and analytics) is stored in our database for fast access. This gives you the 
+            best of both worlds: security and performance.
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Is my data secure on the platform?
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Absolutely! We use enterprise-grade security including end-to-end encryption, JWT authentication, 
+            and smart contract audits. Your sensitive data is encrypted, and blockchain transactions are 
+            immutable. We also have real-time monitoring to detect any suspicious activity.
           </p>
         </div>
       </div>
@@ -531,6 +954,9 @@ const Documentation = () => {
       case 'lender-guide': return renderLenderGuide();
       case 'buyer-guide': return renderBuyerGuide();
       case 'features': return renderFeatures();
+      case 'innovation': return renderInnovation();
+      case 'impact': return renderImpact();
+      case 'architecture': return renderArchitecture();
       case 'faq': return renderFAQ();
       default: return renderOverview();
     }

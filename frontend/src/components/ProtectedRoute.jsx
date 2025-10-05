@@ -1,10 +1,11 @@
+// frontend/src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSupabase } from '../context/SupabaseContext';
+import { useAuth } from '../context/AuthContext';
 
 // Usage: <ProtectedRoute roles={["farmer"]}><FarmerDashboard /></ProtectedRoute>
 const ProtectedRoute = ({ roles, children }) => {
-  const { user, userProfile, loading } = useSupabase();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -18,7 +19,7 @@ const ProtectedRoute = ({ roles, children }) => {
   }
 
   if (roles && roles.length > 0) {
-    const role = userProfile?.role || 'user';
+    const role = user?.role || 'user';
     if (!roles.includes(role)) {
       return <Navigate to="/" replace />;
     }
@@ -28,5 +29,3 @@ const ProtectedRoute = ({ roles, children }) => {
 };
 
 export default ProtectedRoute;
-
-

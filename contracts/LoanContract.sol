@@ -37,8 +37,8 @@ contract LoanContract is ReentrancyGuard, Ownable {
     uint256 public totalLent = 0;
     uint256 public totalEarned = 0;
     uint256 public constant MIN_CREDIT_SCORE = 600;
-    uint256 public constant MAX_LOAN_AMOUNT = 10000 * 10**18; // 10,000 tokens
-    uint256 public constant MIN_LOAN_AMOUNT = 100 * 10**18; // 100 tokens
+    uint256 public constant MAX_LOAN_AMOUNT = 10000 * 10**6; // 10,000 tokens (6 decimals)
+    uint256 public constant MIN_LOAN_AMOUNT = 100 * 10**6; // 100 tokens (6 decimals)
 
     KrishiToken public krishiToken;
 

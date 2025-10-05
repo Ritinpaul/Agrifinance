@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useWeb3 } from '../context/Web3Context';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import apiClient from '../lib/api';
+import toast from 'react-hot-toast';
 
 const LenderDashboard = () => {
   const { account, isConnected } = useWeb3();
+  const { user } = useAuth();
   const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
   const [lenderData, setLenderData] = useState(null);
+  const [walletData, setWalletData] = useState(null);
   const [availableLoans, setAvailableLoans] = useState([]);
   const [myLoans, setMyLoans] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isConnected && account) {
+    if (user) {
       fetchLenderData();
       fetchAvailableLoans();
       fetchMyLoans();
     }
-  }, [isConnected, account]);
+  }, [user]);
 
   const fetchLenderData = async () => {
     // Mock data for development
@@ -167,18 +173,21 @@ const LenderDashboard = () => {
     { id: 'analytics', label: 'Analytics', icon: '📈' }
   ];
 
-  if (!isConnected) {
+  if (!user) {
     return (
       <div className="text-center py-16">
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
           <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-200 mb-3">
-            Wallet Not Connected
+            Authentication Required
           </h2>
           <p className="text-yellow-700 dark:text-yellow-300 mb-4 text-sm">
-            Please connect your MetaMask wallet to access the lender dashboard.
+            Please sign in to access the lender dashboard.
           </p>
-          <button className="agri-button">
-            Connect Wallet
+          <button 
+            onClick={() => window.location.href = '/signin'}
+            className="agri-button"
+          >
+            Sign In
           </button>
         </div>
       </div>

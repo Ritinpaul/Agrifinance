@@ -1,213 +1,122 @@
-import { ethers } from 'ethers';
+// Blockchain Sync Service
+// Handles synchronization between blockchain and database
 
-/**
- * Blockchain synchronization utilities
- * Ensures database stays in sync with on-chain state
- */
+import { api } from '../lib/api';
 
-export class BlockchainSync {
-  constructor(supabase, provider, contractAddresses) {
-    this.supabase = supabase;
+class BlockchainSync {
+  constructor(provider, contractAddresses) {
     this.provider = provider;
     this.contractAddresses = contractAddresses;
   }
 
-  /**
-   * Get block explorer URL for a transaction hash
-   */
-  getBlockExplorerUrl(txHash, chainId = '80002') {
-    const explorers = {
-      '80002': 'https://amoy.polygonscan.com/tx/', // Amoy testnet
-      '137': 'https://polygonscan.com/tx/', // Polygon mainnet
-      '1': 'https://etherscan.io/tx/', // Ethereum mainnet
-    };
-    return `${explorers[chainId] || explorers['80002']}${txHash}`;
-  }
-
-  /**
-   * Record a blockchain transaction in the database
-   */
-  async recordTransaction({
-    userId,
-    txHash,
-    transactionType,
-    fromAddress,
-    toAddress,
-    amount,
-    tokenSymbol = 'KRSI',
-    gasUsed,
-    gasPrice,
-    status = 'pending',
-    relatedTable = null,
-    relatedId = null,
-    metadata = {}
-  }) {
+  // Sync wallet transactions
+  async syncWalletTransactions(userId) {
     try {
-      const { data, error } = await this.supabase
-        .from('blockchain_transactions')
-        .insert([{
-          user_id: userId,
-          tx_hash: txHash,
-          transaction_type: transactionType,
-          from_address: fromAddress,
-          to_address: toAddress,
-          amount: amount,
-          token_symbol: tokenSymbol,
-          gas_used: gasUsed,
-          gas_price: gasPrice,
-          status: status,
-          related_table: relatedTable,
-          related_id: relatedId,
-          metadata: metadata
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error recording blockchain transaction:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update transaction status after confirmation
-   */
-  async updateTransactionStatus(txHash, status, blockNumber = null, gasUsed = null) {
-    try {
-      const updateData = { status, updated_at: new Date().toISOString() };
-      if (blockNumber) updateData.block_number = blockNumber;
-      if (gasUsed) updateData.gas_used = gasUsed;
-
-      const { data, error } = await this.supabase
-        .from('blockchain_transactions')
-        .update(updateData)
-        .eq('tx_hash', txHash)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error updating transaction status:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get user's transaction history
-   */
-  async getUserTransactions(userId, limit = 50) {
-    try {
-      const { data, error } = await this.supabase
-        .from('blockchain_transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching user transactions:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Verify transaction on blockchain
-   */
-  async verifyTransaction(txHash) {
-    try {
-      const receipt = await this.provider.getTransactionReceipt(txHash);
-      if (!receipt) {
-        return { status: 'pending', confirmed: false };
-      }
-
-      return {
-        status: receipt.status === 1 ? 'confirmed' : 'failed',
-        confirmed: true,
-        blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toString(),
-        blockExplorerUrl: this.getBlockExplorerUrl(txHash)
-      };
-    } catch (error) {
-      console.error('Error verifying transaction:', error);
-      return { status: 'pending', confirmed: false };
-    }
-  }
-
-  /**
-   * Sync pending transactions with blockchain
-   */
-  async syncPendingTransactions() {
-    try {
-      const { data: pendingTxs, error } = await this.supabase
-        .from('blockchain_transactions')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true })
-        .limit(20);
-
-      if (error) throw error;
-
-      for (const tx of pendingTxs || []) {
-        const verification = await this.verifyTransaction(tx.tx_hash);
-        if (verification.confirmed) {
-          await this.updateTransactionStatus(
-            tx.tx_hash,
-            verification.status,
-            verification.blockNumber,
-            verification.gasUsed
-          );
-        }
+      const response = await api.post(`/blockchain/sync-wallet/${userId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
       }
     } catch (error) {
-      console.error('Error syncing pending transactions:', error);
+      return { data: null, error: error.message || String(error) };
     }
   }
 
-  /**
-   * Format transaction for display
-   */
-  formatTransaction(tx) {
-    return {
-      ...tx,
-      blockExplorerUrl: this.getBlockExplorerUrl(tx.tx_hash),
-      formattedAmount: tx.amount ? Number(tx.amount).toLocaleString() : '0',
-      formattedGasUsed: tx.gas_used ? Number(tx.gas_used).toLocaleString() : '0',
-      statusColor: this.getStatusColor(tx.status),
-      typeLabel: this.getTransactionTypeLabel(tx.transaction_type)
-    };
+  // Sync NFT transactions
+  async syncNFTTransactions(userId) {
+    try {
+      const response = await api.post(`/blockchain/sync-nft/${userId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
   }
 
-  getStatusColor(status) {
-    const colors = {
-      'pending': 'text-yellow-600',
-      'confirmed': 'text-green-600',
-      'failed': 'text-red-600'
-    };
-    return colors[status] || 'text-gray-600';
+  // Sync loan transactions
+  async syncLoanTransactions(userId) {
+    try {
+      const response = await api.post(`/blockchain/sync-loan/${userId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
   }
 
-  getTransactionTypeLabel(type) {
-    const labels = {
-      'nft_purchase': 'NFT Purchase',
-      'nft_transfer': 'NFT Transfer',
-      'staking': 'Staking',
-      'unstaking': 'Unstaking',
-      'token_transfer': 'Token Transfer',
-      'withdrawal': 'Withdrawal',
-      'deposit': 'Deposit'
-    };
-    return labels[type] || type;
+  // Get pending transactions
+  async getPendingTransactions(userId) {
+    try {
+      const response = await api.get(`/blockchain/pending/${userId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Process pending transaction
+  async processPendingTransaction(transactionId) {
+    try {
+      const response = await api.post(`/blockchain/process/${transactionId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Get transaction history
+  async getTransactionHistory(userId, type = 'all') {
+    try {
+      const response = await api.get(`/blockchain/history/${userId}?type=${type}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Sync all user data
+  async syncAllUserData(userId) {
+    try {
+      const response = await api.post(`/blockchain/sync-all/${userId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
   }
 }
 
-/**
- * Hook for using blockchain sync utilities
- */
-export const useBlockchainSync = (supabase, provider, contractAddresses) => {
-  return new BlockchainSync(supabase, provider, contractAddresses);
+export const useBlockchainSync = (provider, contractAddresses) => {
+  return new BlockchainSync(provider, contractAddresses);
 };
+
+export default BlockchainSync;

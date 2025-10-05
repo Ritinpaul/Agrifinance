@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSupabase } from '../context/SupabaseContext';
+import { useAuth } from '../context/AuthContext';
 import { useWeb3 } from '../context/Web3Context';
 import { useAdminApproval } from '../utils/adminApproval';
 
 const AdminDashboard = () => {
-  const { supabase, user, userProfile } = useSupabase();
+  const { user } = useAuth();
   const web3 = useWeb3();
-  const adminApproval = useAdminApproval(supabase, web3);
+  const adminApproval = useAdminApproval(web3);
   
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +14,10 @@ const AdminDashboard = () => {
   const [notes, setNotes] = useState({});
 
   useEffect(() => {
-    if (userProfile?.role === 'admin') {
+    if (user?.role === 'admin') {
       loadPendingApprovals();
     }
-  }, [userProfile]);
+  }, [user]);
 
   const loadPendingApprovals = async () => {
     setLoading(true);
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (userProfile?.role !== 'admin') {
+  if (user?.role !== 'admin') {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">

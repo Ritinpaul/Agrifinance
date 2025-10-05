@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSupabase } from '../context/SupabaseContext';
+import { useAuth } from '../context/AuthContext';
 import { useWeb3 } from '../context/Web3Context';
 import { useBlockchainSync } from '../utils/blockchainSync';
 
 const TransactionHistory = () => {
-  const { supabase, user } = useSupabase();
+  const { user } = useAuth();
   const { provider } = useWeb3();
-  const blockchainSync = useBlockchainSync(supabase, provider, {});
+  const blockchainSync = useBlockchainSync(provider, {});
   
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -1,31 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiClient from '../lib/api';
+import toast from 'react-hot-toast';
 
 const BatchManagement = () => {
   const [activeTab, setActiveTab] = useState('create');
-  const [batches, setBatches] = useState([
-    {
-      id: 1,
-      productType: 'Wheat',
-      quantity: 1000,
-      pricePerUnit: 25,
-      location: 'Punjab, India',
-      harvestDate: '2024-01-10',
-      certification: 'Organic',
-      status: 'verified',
-      qrCodeHash: 'abc123def456'
-    },
-    {
-      id: 2,
-      productType: 'Rice',
-      quantity: 800,
-      pricePerUnit: 30,
-      location: 'Punjab, India',
-      harvestDate: '2024-01-05',
-      certification: 'Fair Trade',
-      status: 'sold',
-      qrCodeHash: 'xyz789uvw012'
-    }
-  ]);
+  const [batches, setBatches] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     productType: '',
@@ -36,6 +16,26 @@ const BatchManagement = () => {
     certification: ''
   });
 
+  // Fetch batches from database
+  useEffect(() => {
+    fetchBatches();
+  }, []);
+
+  const fetchBatches = async () => {
+    setLoading(true);
+    try {
+      const result = await apiClient.getFarmerBatches();
+      if (result.data?.batches) {
+        setBatches(result.data.batches);
+      }
+    } catch (error) {
+      console.error('Error fetching batches:', error);
+      toast.error('Failed to load batches');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -44,23 +44,42 @@ const BatchManagement = () => {
     }));
   };
 
-  const createBatch = () => {
-    const newBatch = {
-      id: batches.length + 1,
-      ...formData,
-      status: 'created',
-      qrCodeHash: Math.random().toString(36).substring(2, 15)
-    };
-    setBatches([newBatch, ...batches]);
-    setFormData({
-      productType: '',
-      quantity: '',
-      pricePerUnit: '',
-      location: '',
-      harvestDate: '',
-      certification: ''
-    });
-    alert('Batch created successfully!');
+  const createBatch = async () => {
+    setLoading(true);
+    try {
+      const batchData = {
+        crop_type: formData.productType,
+        variety: formData.productType, // Using productType as variety
+        quantity_kg: parseFloat(formData.quantity),
+        harvest_date: formData.harvestDate,
+        quality_grade: formData.certification,
+        certification_status: 'pending',
+        batch_number: `BATCH-${Date.now()}`,
+        storage_location: formData.location,
+        price_per_kg: parseFloat(formData.pricePerUnit),
+        total_value: parseFloat(formData.quantity) * parseFloat(formData.pricePerUnit)
+      };
+
+      const result = await apiClient.createFarmerBatch(batchData);
+      if (result.data?.batch) {
+        toast.success('Batch created successfully!');
+        setFormData({
+          productType: '',
+          quantity: '',
+          pricePerUnit: '',
+          location: '',
+          harvestDate: '',
+          certification: ''
+        });
+        // Refresh the batches list
+        fetchBatches();
+      }
+    } catch (error) {
+      console.error('Error creating batch:', error);
+      toast.error('Failed to create batch');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -137,7 +156,7 @@ const BatchManagement = () => {
               </div>
 
               <div>
-                <label className="form-label">Price per Unit (USD)</label>
+                <label className="form-label">Price per Unit (KRSI)</label>
                 <input
                   type="number"
                   name="pricePerUnit"
@@ -210,49 +229,66 @@ const BatchManagement = () => {
             Your Batches
           </h3>
 
-          <div className="space-y-4">
-            {batches.map((batch) => (
-              <div key={batch.id} className="agri-card p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800">
-                      {batch.productType} Batch #{batch.id}
-                    </h4>
-                    <p className="text-gray-600">
-                      {batch.quantity} kg • ${batch.pricePerUnit}/kg
-                    </p>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(batch.status)}`}>
-                    {batch.status.toUpperCase()}
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">Loading batches...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {batches.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 dark:text-gray-400 mb-4">
+                    <div className="text-4xl mb-2">📦</div>
+                    <p className="text-lg font-medium">No Batches Found</p>
+                    <p className="text-sm">Create your first batch to get started.</p>
                   </div>
                 </div>
+              ) : (
+                batches.map((batch) => (
+                  <div key={batch.id} className="agri-card p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-800">
+                          {batch.crop_type} Batch #{batch.batch_number}
+                        </h4>
+                        <p className="text-gray-600">
+                          {batch.quantity_kg} kg • {batch.price_per_kg} KRSI/kg
+                        </p>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(batch.certification_status)}`}>
+                        {batch.certification_status.toUpperCase()}
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Location</div>
-                    <div className="font-medium">{batch.location}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Harvest Date</div>
-                    <div className="font-medium">{batch.harvestDate}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Certification</div>
-                    <div className="font-medium">{batch.certification}</div>
-                  </div>
-                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <div className="text-sm text-gray-500">Location</div>
+                        <div className="font-medium">{batch.storage_location}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Harvest Date</div>
+                        <div className="font-medium">{batch.harvest_date}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Quality Grade</div>
+                        <div className="font-medium">{batch.quality_grade}</div>
+                      </div>
+                    </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    QR Code: {batch.qrCodeHash}
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-500">
+                        Batch ID: {batch.batch_number}
+                      </div>
+                      <div className="text-lg font-bold text-green-600">
+                        Total: {batch.total_value} KRSI
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-lg font-bold text-green-600">
-                    Total: ${(batch.quantity * batch.pricePerUnit).toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

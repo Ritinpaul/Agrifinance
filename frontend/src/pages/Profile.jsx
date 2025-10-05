@@ -1,199 +1,190 @@
-import React, { useEffect, useState } from 'react';
-import { useSupabase } from '../context/SupabaseContext';
-import { MobileWalletUtils } from '../utils/mobileWalletUtils';
+// frontend/src/pages/Profile.jsx
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import ProfileCompletion from '../components/ProfileCompletion';
 
 const Profile = () => {
-  const { user, userProfile, updateProfile, fetchUserProfile } = useSupabase();
+  const { user, updateProfile, loading } = useAuth();
   const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', role: '' });
   const [saving, setSaving] = useState(false);
   const [showProfileCompletion, setShowProfileCompletion] = useState(false);
 
   useEffect(() => {
-    if (userProfile) {
-      const fallbackPhone = userProfile.phone || user?.phone || '';
+    if (user) {
       setForm({
-        first_name: userProfile.first_name || '',
-        last_name: userProfile.last_name || '',
-        phone: fallbackPhone,
-        role: userProfile.role || 'user',
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        phone: user.phone || '',
+        role: user.role || 'farmer',
       });
       
-      // Check if profile is incomplete and show modal
-      const isProfileIncomplete = !userProfile.profile_completed || 
-        !userProfile.first_name || 
-        !userProfile.last_name || 
-        !userProfile.role;
-      
-      if (isProfileIncomplete) {
+      // Show profile completion if profile is not completed
+      if (!user.profile_completed) {
         setShowProfileCompletion(true);
       }
     }
-  }, [userProfile, user]);
+  }, [user]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Special handling for phone number with auto-formatting
-    if (name === 'phone') {
-      MobileWalletUtils.handlePhoneInputChange(e, setForm);
-    } else {
-      setForm((f) => ({ ...f, [name]: value }));
-    }
-  };
-
-  const validateForm = () => {
-    if (!form.first_name.trim()) {
-      toast.error('First name is required');
-      return false;
-    }
-    if (!form.last_name.trim()) {
-      toast.error('Last name is required');
-      return false;
-    }
-    if (!form.phone.trim()) {
-      toast.error('Phone number is required');
-      return false;
-    }
-    if (!form.role) {
-      toast.error('Please select a role');
-      return false;
-    }
-    return true;
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
     setSaving(true);
-    
-    // Add timeout to prevent stuck saving state
-    const timeoutId = setTimeout(() => {
-      setSaving(false);
-      toast.error('Profile update timed out. Please try again.');
-    }, 10000); // 10 second timeout
-    
+
     try {
-      console.log('Profile page: Starting profile update...');
-      
-      const { error } = await updateProfile({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        phone: form.phone,
-        role: form.role,
-        updated_at: new Date().toISOString()
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (error) {
-        toast.error(error.message || 'Failed to update profile');
-        console.error('Profile update error:', error);
-      } else {
-        toast.success('Profile updated successfully');
-        console.log('Profile updated successfully');
-        
-        // Refresh user profile data to ensure UI is updated
-        if (user?.id) {
-          setTimeout(() => {
-            fetchUserProfile(user.id);
-          }, 1000);
-        }
+      const result = await updateProfile(form);
+      if (result.success) {
+        toast.success('Profile updated successfully!');
       }
     } catch (error) {
-      clearTimeout(timeoutId);
-      toast.error('An unexpected error occurred');
       console.error('Profile update error:', error);
+      toast.error('Failed to update profile');
     } finally {
       setSaving(false);
     }
   };
 
-  if (!user) {
+
+  // Show loading state
+  if (loading) {
     return (
-      <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Profile</h2>
-        <p className="text-gray-600 dark:text-gray-300">Please sign in to view your profile.</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading profile...</p>
+        </div>
       </div>
     );
   }
 
-  const missingPhone = !form.phone || form.phone.trim() === '';
-  const isProfileIncomplete = !userProfile?.profile_completed || 
-    !userProfile?.first_name || 
-    !userProfile?.last_name || 
-    !userProfile?.role;
-
-  return (
-    <>
-      <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Profile</h2>
-          {isProfileIncomplete && (
-            <button
-              onClick={() => setShowProfileCompletion(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-            >
-              Complete Profile
-            </button>
-          )}
-        </div>
-
-      {missingPhone && (
-        <div className="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-800">
-          For better account recovery and notifications, please add your phone number.
-        </div>
-      )}
-      <form className="space-y-4" onSubmit={handleSave}>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">First Name</label>
-            <input name="first_name" value={form.first_name} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
-          </div>
-          <div>
-            <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Last Name</label>
-            <input name="last_name" value={form.last_name} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Phone</label>
-          <input name="phone" value={form.phone} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white" placeholder="+91XXXXXXXXXX" />
-        </div>
-        <div>
-          <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Role</label>
-          <select 
-            name="role" 
-            value={form.role} 
-            onChange={handleChange} 
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-          >
-            <option value="user">User</option>
-            <option value="farmer">Farmer</option>
-            <option value="lender">Lender</option>
-            <option value="buyer">Buyer</option>
-          </select>
-        </div>
-        <button type="submit" disabled={saving} className="agri-button disabled:opacity-50">{saving ? 'Saving...' : 'Save Changes'}</button>
-      </form>
-    </div>
-    
-    {/* Profile Completion Modal */}
-    {showProfileCompletion && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <ProfileCompletion onComplete={() => setShowProfileCompletion(false)} />
+  // Show message if no user (this should not happen due to ProtectedRoute)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+          <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Profile</h2>
+          <p className="text-gray-600 dark:text-gray-400">Please sign in to view your profile.</p>
         </div>
       </div>
-    )}
-  </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+          <div className="text-center mb-8">
+            <div className="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center mb-4">
+              <span className="text-white text-xl">👤</span>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Your Profile
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Manage your account information
+            </p>
+          </div>
+          
+          
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                id="phone"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Role
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                required
+              >
+                <option value="farmer">Farmer</option>
+                <option value="lender">Lender</option>
+                <option value="buyer">Buyer</option>
+              </select>
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={saving} 
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                  Saving...
+                </div>
+              ) : (
+                'Save Changes'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      {/* Profile Completion Modal */}
+      {showProfileCompletion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <ProfileCompletion
+              user={user}
+              onComplete={() => setShowProfileCompletion(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default Profile;
-
-

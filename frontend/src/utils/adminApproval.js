@@ -1,318 +1,167 @@
-import { ethers } from 'ethers';
+// Admin Approval Service
+// Handles admin approval workflows for NFT purchases and minting
 
-/**
- * Admin Approval Service
- * Handles regulatory compliance by requiring admin approval for sensitive transactions
- */
+import { api } from '../lib/api';
 
-export class AdminApprovalService {
-  constructor(supabase, web3Context) {
-    this.supabase = supabase;
-    this.web3 = web3Context;
+class AdminApprovalService {
+  constructor(web3Context) {
+    this.web3Context = web3Context;
   }
 
-  /**
-   * Request NFT purchase approval
-   */
-  async requestNFTPurchase(nftData, buyerAddress, price) {
-    try {
-      const { data, error } = await this.supabase
-        .from('admin_approvals')
-        .insert([{
-          user_id: nftData.userId,
-          transaction_type: 'nft_purchase',
-          status: 'pending',
-          request_data: {
-            nftId: nftData.id,
-            tokenId: nftData.tokenId,
-            sellerAddress: nftData.owner_address,
-            buyerAddress: buyerAddress,
-            price: price,
-            nftData: nftData
-          }
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error requesting NFT purchase approval:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Request NFT minting approval
-   */
-  async requestNFTMint(mintData, farmerAddress) {
-    try {
-      const { data, error } = await this.supabase
-        .from('admin_approvals')
-        .insert([{
-          user_id: mintData.userId,
-          transaction_type: 'nft_mint',
-          status: 'pending',
-          request_data: {
-            location: mintData.location,
-            landSize: mintData.landSize,
-            metadata: mintData.metadata,
-            farmerAddress: farmerAddress,
-            mintData: mintData
-          }
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error requesting NFT mint approval:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Request withdrawal approval
-   */
-  async requestWithdrawal(withdrawalData, userAddress) {
-    try {
-      const { data, error } = await this.supabase
-        .from('admin_approvals')
-        .insert([{
-          user_id: withdrawalData.userId,
-          transaction_type: 'withdrawal',
-          status: 'pending',
-          request_data: {
-            amount: withdrawalData.amount,
-            tokenSymbol: withdrawalData.tokenSymbol,
-            fromAddress: userAddress,
-            toAddress: withdrawalData.toAddress,
-            withdrawalData: withdrawalData
-          }
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error requesting withdrawal approval:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get pending approvals for admin dashboard
-   */
+  // Get pending approvals
   async getPendingApprovals() {
     try {
-      const { data, error } = await this.supabase
-        .from('admin_approvals')
-        .select(`
-          *,
-          users:user_id (
-            email,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching pending approvals:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Approve a transaction (admin only)
-   */
-  async approveTransaction(approvalId, adminUserId, notes = '') {
-    try {
-      // Update approval status
-      const { data: approval, error: updateError } = await this.supabase
-        .from('admin_approvals')
-        .update({
-          status: 'approved',
-          approved_by: adminUserId,
-          approved_at: new Date().toISOString(),
-          admin_notes: notes
-        })
-        .eq('id', approvalId)
-        .select()
-        .single();
-
-      if (updateError) throw updateError;
-
-      // Execute the transaction based on type
-      let txHash = null;
-      switch (approval.transaction_type) {
-        case 'nft_purchase':
-          txHash = await this.executeNFTPurchase(approval.request_data);
-          break;
-        case 'nft_mint':
-          txHash = await this.executeNFTMint(approval.request_data);
-          break;
-        case 'withdrawal':
-          txHash = await this.executeWithdrawal(approval.request_data);
-          break;
-        default:
-          throw new Error(`Unknown transaction type: ${approval.transaction_type}`);
+      const response = await api.get('/admin/approvals/pending');
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
       }
-
-      // Update approval with transaction hash
-      await this.supabase
-        .from('admin_approvals')
-        .update({
-          blockchain_tx_hash: txHash,
-          status: 'executed'
-        })
-        .eq('id', approvalId);
-
-      return { approval, txHash };
     } catch (error) {
-      console.error('Error approving transaction:', error);
-      throw error;
+      return { data: null, error: error.message || String(error) };
     }
   }
 
-  /**
-   * Reject a transaction (admin only)
-   */
-  async rejectTransaction(approvalId, adminUserId, reason = '') {
+  // Create approval request
+  async createApprovalRequest(userId, approvalType, requestData) {
     try {
-      const { data, error } = await this.supabase
-        .from('admin_approvals')
-        .update({
-          status: 'rejected',
-          approved_by: adminUserId,
-          approved_at: new Date().toISOString(),
-          admin_notes: reason
-        })
-        .eq('id', approvalId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const response = await api.post('/admin/approvals/create', {
+        userId,
+        approvalType,
+        requestData
+      });
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
     } catch (error) {
-      console.error('Error rejecting transaction:', error);
-      throw error;
+      return { data: null, error: error.message || String(error) };
     }
   }
 
-  /**
-   * Execute NFT purchase on blockchain
-   */
-  async executeNFTPurchase(requestData) {
+  // Approve request
+  async approveRequest(approvalId, adminNotes = '') {
     try {
-      const { nftData, buyerAddress, price } = requestData;
-      const priceWei = ethers.parseEther(price.toString());
+      const response = await api.post(`/admin/approvals/${approvalId}/approve`, {
+        adminNotes
+      });
       
-      const tx = await this.web3.buyNFT(nftData.tokenId, priceWei);
-      
-      // Update NFT ownership in database
-      await this.supabase
-        .from('nft_lands')
-        .update({
-          owner_address: buyerAddress,
-          is_for_sale: false,
-          blockchain_tx_hash: tx.hash,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', nftData.id);
-
-      return tx.hash;
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
     } catch (error) {
-      console.error('Error executing NFT purchase:', error);
-      throw error;
+      return { data: null, error: error.message || String(error) };
     }
   }
 
-  /**
-   * Execute NFT minting on blockchain
-   */
-  async executeNFTMint(requestData) {
+  // Reject request
+  async rejectRequest(approvalId, adminNotes = '') {
     try {
-      const { mintData, farmerAddress } = requestData;
+      const response = await api.post(`/admin/approvals/${approvalId}/reject`, {
+        adminNotes
+      });
       
-      // This would call the NFTLand contract's mint function
-      // For now, we'll simulate it and update the database
-      const txHash = `0x${Math.random().toString(16).substr(2, 40)}`; // Simulated hash
-      
-      // Update NFT in database
-      await this.supabase
-        .from('nft_lands')
-        .update({
-          blockchain_tx_hash: txHash,
-          owner_address: farmerAddress,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', mintData.id);
-
-      return txHash;
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
     } catch (error) {
-      console.error('Error executing NFT mint:', error);
-      throw error;
+      return { data: null, error: error.message || String(error) };
     }
   }
 
-  /**
-   * Execute withdrawal on blockchain
-   */
-  async executeWithdrawal(requestData) {
-    try {
-      const { amount, tokenSymbol, fromAddress, toAddress } = requestData;
-      
-      // This would execute the actual token transfer
-      // For now, we'll simulate it
-      const txHash = `0x${Math.random().toString(16).substr(2, 40)}`; // Simulated hash
-      
-      // Update wallet transaction status
-      await this.supabase
-        .from('wallet_transactions')
-        .update({
-          status: 'confirmed',
-          blockchain_tx_hash: txHash,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', requestData.withdrawalData.userId)
-        .eq('status', 'requested');
-
-      return txHash;
-    } catch (error) {
-      console.error('Error executing withdrawal:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get user's approval requests
-   */
+  // Get user approvals
   async getUserApprovals(userId) {
     try {
-      const { data, error } = await this.supabase
-        .from('admin_approvals')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
+      const response = await api.get(`/admin/approvals/user/${userId}`);
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
     } catch (error) {
-      console.error('Error fetching user approvals:', error);
-      return [];
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Process NFT purchase approval
+  async processNFTPurchaseApproval(approvalId, nftId, buyerId) {
+    try {
+      const response = await api.post(`/admin/approvals/${approvalId}/process-nft-purchase`, {
+        nftId,
+        buyerId
+      });
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Process NFT minting approval
+  async processNFTMintingApproval(approvalId, nftData, ownerId) {
+    try {
+      const response = await api.post(`/admin/approvals/${approvalId}/process-nft-minting`, {
+        nftData,
+        ownerId
+      });
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Process loan approval
+  async processLoanApproval(approvalId, loanId) {
+    try {
+      const response = await api.post(`/admin/approvals/${approvalId}/process-loan`, {
+        loanId
+      });
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
+    }
+  }
+
+  // Get approval statistics
+  async getApprovalStats() {
+    try {
+      const response = await api.get('/admin/approvals/stats');
+      
+      if (response.success) {
+        return { data: response.data, error: null };
+      } else {
+        return { data: null, error: response.error || 'Unknown error' };
+      }
+    } catch (error) {
+      return { data: null, error: error.message || String(error) };
     }
   }
 }
 
-/**
- * Hook for using admin approval service
- */
-export const useAdminApproval = (supabase, web3Context) => {
-  return new AdminApprovalService(supabase, web3Context);
+export const useAdminApproval = (web3Context) => {
+  return new AdminApprovalService(web3Context);
 };
+
+export default AdminApprovalService;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useWeb3 } from '../context/Web3Context';
 import { useTheme } from '../context/ThemeContext';
-import { useSupabase } from '../context/SupabaseContext';
+import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
 import ServicesDropdown from './ServicesDropdown';
 import DigitalAssetsDropdown from './DigitalAssetsDropdown';
@@ -10,9 +10,19 @@ import toast from 'react-hot-toast';
 
 const Navbar = () => {
   const location = useLocation();
-  const { account, isConnected, connectWallet, disconnectWallet, isLoading, error } = useWeb3();
   const { theme, toggleTheme } = useTheme();
-  const { user, session, userProfile, signOut, loading } = useSupabase();
+  const { user, signOut, loading } = useAuth();
+  
+  // Web3 is optional - handle gracefully if not available
+  let web3Data = { account: null, isConnected: false, connectWallet: () => {}, disconnectWallet: () => {}, isLoading: false, error: null };
+  try {
+    const web3 = useWeb3();
+    web3Data = web3;
+  } catch (error) {
+    console.log('Web3 not available:', error.message);
+  }
+  
+  const { account, isConnected, connectWallet, disconnectWallet, isLoading, error } = web3Data;
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,7 +31,7 @@ const Navbar = () => {
   // Force refresh when user state changes
   useEffect(() => {
     setForceRefresh(prev => prev + 1);
-  }, [user, userProfile, loading]);
+  }, [user, loading]);
   
   // Drive auth UI strictly from `user`, which we clear aggressively on signOut
   const isAuthenticated = Boolean(user?.id);
@@ -150,10 +160,10 @@ const Navbar = () => {
                   className="flex items-center space-x-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-500 text-white flex items-center justify-center text-sm font-semibold">
-                    {(userProfile?.first_name || userProfile?.email || user?.email || 'U').charAt(0).toUpperCase()}
+                    {(user?.first_name || user?.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {userProfile?.first_name || 'User'}
+                    {user?.first_name || 'User'}
                   </span>
                   <svg className={`w-4 h-4 text-gray-500 dark:text-gray-300 transform transition-transform ${openUserMenu ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
@@ -162,8 +172,8 @@ const Navbar = () => {
                 {openUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{userProfile?.first_name || 'User'}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{userProfile?.email || user?.email}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user?.first_name || 'User'}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
                     </div>
                     <Link 
                       to="/profile" 
@@ -179,7 +189,7 @@ const Navbar = () => {
                           toast.success('Signing out...');
                           const { error } = await signOut();
                           if (error) {
-                            toast.error(error.message || 'Failed to sign out');
+                            toast.error(error || 'Failed to sign out');
                             return;
                           }
                           setTimeout(() => {
@@ -276,7 +286,7 @@ const Navbar = () => {
                       toast.success('Signing out...');
                       const { error } = await signOut();
                       if (error) {
-                        toast.error(error.message || 'Failed to sign out');
+                        toast.error(error || 'Failed to sign out');
                         return;
                       }
                       setTimeout(() => {

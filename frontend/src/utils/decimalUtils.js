@@ -2,12 +2,12 @@ import { ethers } from 'ethers';
 
 /**
  * Decimal Precision Utilities
- * Handles conversion between human-readable decimals and blockchain wei (18 decimals)
+ * Handles conversion between human-readable decimals and blockchain wei (6 decimals)
  * Prevents precision loss and calculation errors
  */
 
 export class DecimalUtils {
-  static DECIMALS = 18;
+  static DECIMALS = 6; // Changed from 18 to 6
   static WEI_MULTIPLIER = 10n ** BigInt(this.DECIMALS);
 
   /**
@@ -166,7 +166,7 @@ export class DecimalUtils {
    * @param {number} maxDecimals - Maximum decimal places allowed
    * @returns {boolean} - Whether amount is valid
    */
-  static isValidAmount(amount, maxDecimals = 18) {
+  static isValidAmount(amount, maxDecimals = 6) {
     try {
       if (!amount || amount === '') return false;
       
@@ -230,7 +230,7 @@ export class DecimalUtils {
    * @param {number} decimals - Decimal precision
    * @returns {string} - Maximum safe amount
    */
-  static getMaxSafeAmount(decimals = 18) {
+  static getMaxSafeAmount(decimals = 6) {
     const maxWei = BigInt(2) ** BigInt(256) - 1n;
     return this.fromWei(maxWei.toString(), decimals);
   }
@@ -250,7 +250,7 @@ export const AmountValidation = {
   /**
    * Validate form input amount
    */
-  validateInput: (value, maxDecimals = 18) => {
+  validateInput: (value, maxDecimals = 6) => {
     if (!value || value === '') return { valid: true, error: null };
     
     const trimmed = value.trim();

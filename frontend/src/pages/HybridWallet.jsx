@@ -1,13 +1,15 @@
+// frontend/src/pages/HybridWallet.jsx
 import React, { useState, useEffect } from 'react';
-import { useSupabase } from '../context/SupabaseContext';
+import { useAuth } from '../context/AuthContext';
 import { useWeb3 } from '../context/Web3Context';
 import { DecimalUtils } from '../utils/decimalUtils';
 import MobileWalletUtils from '../utils/mobileWalletUtils';
 import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
+import apiClient from '../lib/api';
 
 const HybridWallet = () => {
-  const { supabase, user, userProfile } = useSupabase();
+  const { user } = useAuth();
   const { account, isConnected, krishiTokenContract } = useWeb3();
 
   // State management
@@ -42,21 +44,16 @@ const HybridWallet = () => {
 
     setLinkingMobile(true);
     try {
-      // Save mobile number to wallet metadata
-      const { error } = await supabase
-        .from('wallet_accounts')
-        .update({
-          metadata: {
-            ...agriWallet.metadata,
-            mobile_number: mobileNumber,
-            mobile_linked_at: new Date().toISOString()
-          }
-        })
-        .eq('id', agriWallet.id);
+      // Call the real API endpoint
+      const result = await apiClient.linkMobileNumber({
+        mobile_number: mobileNumber
+      });
 
-      if (error) throw error;
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to link mobile number');
+      }
 
-      // Update local state
+      // Update local state with the response
       setAgriWallet(prev => ({
         ...prev,
         metadata: {
@@ -76,41 +73,7 @@ const HybridWallet = () => {
     }
   };
 
-  // Test database connection - IMPROVED WITH TABLE STRUCTURE CHECK
-  const testDatabaseConnection = async () => {
-    try {
-      console.log('🔍 Testing database connection...');
-      
-      // First, try to check if the table exists and has the right structure
-      const { data, error } = await supabase
-        .from('wallet_accounts')
-        .select('id, user_id, address, wallet_type, balance_wei, metadata')
-        .limit(1);
-      
-      if (error) {
-        console.log('❌ Database query failed:', error.message);
-        console.log('❌ Error code:', error.code);
-        console.log('❌ Error details:', error.details);
-        
-        // If it's a column error, the table might not have the right structure
-        if (error.code === '42703') {
-          console.log('❌ Table structure issue - missing columns');
-          toast.error('Database table structure needs to be updated. Please run the SQL script.');
-        }
-        
-        return false;
-      }
-      
-      console.log('✅ Database connection successful');
-      console.log('✅ Table structure looks good');
-      return true;
-    } catch (error) {
-      console.log('❌ Database connection test failed:', error.message);
-      return false;
-    }
-  };
-
-  // Sync wallet to database - FIXED TO ACTUALLY WORK
+  // Sync wallet to database - REAL DATABASE INTEGRATION
   const syncWalletToDatabase = async () => {
     console.log('🚀 SYNC BUTTON CLICKED!');
     
@@ -125,103 +88,34 @@ const HybridWallet = () => {
       user_id: user.id,
       balance: agriWallet.balance_wei
     });
-    console.log('🔍 Supabase client:', supabase);
-    console.log('🔍 User auth:', user);
     
     setSyncing(true);
     
     try {
-      // STEP 0: Test basic Supabase connection - THIS WILL MAKE A NETWORK REQUEST
-      console.log('🧪 Testing basic Supabase connection...');
-      console.log('🌐 This should show a network request in DevTools Network tab');
-      
-      const { data: testData, error: testError } = await supabase
-        .from('wallet_accounts')
-        .select('count')
-        .limit(1);
-      
-      console.log('🧪 Basic test result:', { testData, testError });
-      
-      if (testError) {
-        console.log('❌ Basic test failed:', testError);
-        throw new Error(`Supabase connection failed: ${testError.message}`);
-      }
-      
-      console.log('✅ Supabase connection working - network request successful');
-      
-      // STEP 1: Check if wallet already exists - THIS WILL MAKE ANOTHER NETWORK REQUEST
-      console.log('🔍 Checking if wallet exists...');
-      console.log('🌐 This should show another network request in DevTools Network tab');
-      
-      const { data: existingWallet, error: checkError } = await supabase
-        .from('wallet_accounts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('wallet_type', 'agrifinance')
-        .maybeSingle(); // Use maybeSingle() to avoid error if no record found
+      // Call the real API endpoint
+      const result = await apiClient.syncWallet({
+        address: agriWallet.address,
+        balance_wei: agriWallet.balance_wei || '0',
+        metadata: agriWallet.metadata
+      });
 
-      console.log('🔍 Check result:', { existingWallet, checkError });
-
-      if (checkError) {
-        throw new Error(`Failed to check existing wallet: ${checkError.message}`);
+      if (result.error) {
+        throw new Error(result.error.message || 'Sync failed');
       }
 
-      if (existingWallet) {
-        // STEP 2A: Wallet exists - UPDATE it - THIS WILL MAKE A NETWORK REQUEST
-        console.log('📝 Wallet exists, updating...');
-        console.log('🌐 This should show an UPDATE network request in DevTools Network tab');
-        
-        const { data: updateData, error: updateError } = await supabase
-          .from('wallet_accounts')
-          .update({
-            address: agriWallet.address,
-            balance_wei: agriWallet.balance_wei || '0',
-            metadata: agriWallet.metadata,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingWallet.id)
-          .select()
-          .single();
-
-        console.log('📝 Update result:', { updateData, updateError });
-
-        if (updateError) {
-          throw new Error(`Failed to update wallet: ${updateError.message}`);
-        }
-
-        console.log('✅ Wallet updated successfully!');
-        setIsWalletSynced(true);
-        toast.success('Wallet synced to database successfully!');
-        
-      } else {
-        // STEP 2B: Wallet doesn't exist - INSERT it - THIS WILL MAKE A NETWORK REQUEST
-        console.log('📝 No existing wallet, creating new...');
-        console.log('🌐 This should show an INSERT network request in DevTools Network tab');
-        
-        const { data: insertData, error: insertError } = await supabase
-          .from('wallet_accounts')
-          .insert({
-            user_id: user.id,
-            address: agriWallet.address,
-            wallet_type: 'agrifinance',
-            balance_wei: agriWallet.balance_wei || '0',
-            metadata: agriWallet.metadata,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .select()
-          .single();
-
-        console.log('📝 Insert result:', { insertData, insertError });
-
-        if (insertError) {
-          throw new Error(`Failed to insert wallet: ${insertError.message}`);
-        }
-
-        console.log('✅ Wallet created in database successfully!');
-        setIsWalletSynced(true);
-        toast.success('Wallet saved to database successfully!');
+      console.log('✅ Wallet synced successfully!', result.data);
+      console.log('📊 Updated wallet balance_wei:', result.data.wallet?.balance_wei);
+      setIsWalletSynced(true);
+      toast.success('Wallet synced to database successfully!');
+      
+      // Update the wallet state with the synced data
+      if (result.data && result.data.wallet) {
+        setAgriWallet(result.data.wallet);
+        setBlockchainBalance(ethers.formatUnits(result.data.wallet.balance_wei || '0', 6));
       }
+      
+      // Refresh wallet data from database to ensure we have the latest balance
+      await loadWalletData();
       
     } catch (error) {
       console.error('❌ Sync error:', error);
@@ -237,6 +131,21 @@ const HybridWallet = () => {
     console.log('🔄 Manually resetting sync state');
     setSyncing(false);
     toast.info('Sync state reset - you can try again');
+  };
+
+  // Manual refresh function to get latest wallet data from database
+  const refreshWalletData = async () => {
+    console.log('🔄 Manually refreshing wallet data...');
+    setLoading(true);
+    try {
+      await loadWalletData();
+      toast.success('Wallet data refreshed!');
+    } catch (error) {
+      console.error('Error refreshing wallet data:', error);
+      toast.error('Failed to refresh wallet data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Create wallet immediately function
@@ -282,14 +191,14 @@ const HybridWallet = () => {
   // Resolve phone number to wallet address
   const resolvePhoneToAddress = async (phoneNumber) => {
     try {
-      const { data: walletAccount } = await supabase
-        .from('wallet_accounts')
-        .select('address, metadata')
-        .eq('wallet_type', 'agrifinance')
-        .eq('metadata->mobile_number', phoneNumber)
-        .single();
+      const result = await apiClient.findWalletByMobile(phoneNumber);
+      
+      if (result.error) {
+        console.error('Error resolving phone to address:', result.error);
+        return null;
+      }
 
-      return walletAccount?.address || null;
+      return result.data?.wallet?.address || null;
     } catch (error) {
       console.error('Error resolving phone to address:', error);
       return null;
@@ -355,25 +264,10 @@ const HybridWallet = () => {
     }
   };
 
-  // Generate real AgriFinance wallet address using ethers.js
-  const generateRealAgriWallet = () => {
-    // Generate a real Ethereum wallet with private key
-    const wallet = ethers.Wallet.createRandom();
-    
-    return {
-      address: wallet.address,
-      privateKey: wallet.privateKey,
-      mnemonic: wallet.mnemonic?.phrase || null
-    };
-  };
-
-  // Auto-reset sync state if it gets stuck - REMOVED TO PREVENT INTERFERENCE
-
-  // Load wallet data - FIXED ERROR HANDLING
+  // Load wallet data - REAL DATABASE INTEGRATION
   const loadWalletData = async () => {
     console.log('🔄 Starting wallet load...');
     console.log('User:', user?.id ? 'Present' : 'Missing');
-    console.log('Supabase:', supabase ? 'Connected' : 'Not connected');
     
     if (!user?.id) {
       console.log('❌ No user ID, stopping loading');
@@ -384,33 +278,58 @@ const HybridWallet = () => {
     setLoading(true);
     
     try {
-      // Try database first - SIMPLIFIED APPROACH
+      // Try to get existing wallet from database first
       console.log('🔍 Checking for existing wallet in database...');
       
-      const { data: existingWallet, error: dbError } = await supabase
-        .from('wallet_accounts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('wallet_type', 'agrifinance')
-        .single();
+      const result = await apiClient.getWallet();
       
-      console.log('🔍 Database query result:', { existingWallet, dbError });
-      
-      if (existingWallet) {
-        console.log('✅ Found existing wallet:', existingWallet.address);
-        setAgriWallet(existingWallet);
+      if (result.data && result.data.wallet) {
+        console.log('✅ Found existing wallet:', result.data.wallet.address);
+        console.log('📊 Loaded wallet balance_wei:', result.data.wallet.balance_wei);
+        setAgriWallet(result.data.wallet);
         setIsWalletSynced(true); // Wallet is already synced
-      } else if (dbError && dbError.code === 'PGRST116') {
-        console.log('ℹ️ No existing wallet found, creating new one');
-        throw new Error('No existing wallet found');
+        
+        // Set the blockchain balance from the database
+        setBlockchainBalance(ethers.formatUnits(result.data.wallet.balance_wei || '0', 6));
       } else {
-        console.log('❌ Database error:', dbError);
-        throw new Error(`Database error: ${dbError.message}`);
+        console.log('ℹ️ No existing wallet found, creating new one');
+        
+        // Create wallet locally
+        const persistentWallet = generatePersistentWallet(user.id);
+        
+        const localWallet = {
+          id: 'local-' + user.id,
+          user_id: user.id,
+          address: persistentWallet.address,
+          wallet_type: 'agrifinance',
+          chain_id: 'amoy',
+          token_symbol: 'KRSI',
+          balance_wei: '0',
+          custodial: true,
+          metadata: {
+            private_key: persistentWallet.privateKey,
+            mnemonic: persistentWallet.mnemonic,
+            created_at: new Date().toISOString(),
+            is_real_wallet: true,
+            is_persistent: true,
+            is_local: true,
+            user_id: user.id
+          }
+        };
+        
+        console.log('✅ Created local wallet:', localWallet.address);
+        setAgriWallet(localWallet);
+        setIsWalletSynced(false); // Local wallet needs to be synced
+        
+        if (!walletCreated) {
+          toast.success('AgriFinance wallet created!');
+          setWalletCreated(true);
+        }
       }
-    } catch (dbError) {
-      console.log('⚠️ Database failed or timeout, creating local wallet:', dbError.message);
+    } catch (error) {
+      console.log('⚠️ Database failed, creating local wallet:', error.message);
       
-      // Create wallet locally
+      // Create wallet locally as fallback
       const persistentWallet = generatePersistentWallet(user.id);
       
       const localWallet = {
@@ -594,23 +513,19 @@ const HybridWallet = () => {
       // Update wallet balance
       const newBalance = await tokenContract.balanceOf(agriWallet.address);
       
-      // Update database
-      await supabase
-        .from('wallet_accounts')
-        .update({ balance_wei: newBalance.toString() })
-        .eq('id', agriWallet.id);
+      // Update local state
+      setAgriWallet(prev => ({
+        ...prev,
+        balance_wei: newBalance.toString()
+      }));
 
-      // Record successful transaction
-      await supabase
-        .from('wallet_transactions')
-        .insert([{
-          user_id: user.id,
-          wallet_id: agriWallet.id,
+      // Record transaction in database
+      try {
+        await apiClient.createTransaction({
           direction: 'out',
           amount_wei: amountWei,
-          token_symbol: 'KRSI',
-          status: 'completed',
           to_address: recipientAddress,
+          from_address: agriWallet.address,
           blockchain_tx_hash: receipt.hash,
           metadata: {
             type: 'agrifinance_transfer',
@@ -622,7 +537,11 @@ const HybridWallet = () => {
             gas_used: receipt.gasUsed.toString(),
             block_number: receipt.blockNumber
           }
-        }]);
+        });
+      } catch (txError) {
+        console.error('Failed to record transaction:', txError);
+        // Don't fail the whole operation if transaction recording fails
+      }
 
       toast.success(`Transfer successful! TX: ${receipt.hash.slice(0, 10)}...`, { id: 'agri-transfer' });
       setAgriSendForm({ toAddress: '', toMobile: '', amount: '', description: '', sendType: 'address' });
@@ -647,9 +566,6 @@ const HybridWallet = () => {
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading your wallets...</p>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
             User: {user?.id ? '✅ Connected' : '❌ Not connected'}
-          </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-500">
-            Database: {supabase ? '✅ Available' : '❌ Not available'}
           </p>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-500">
             This should complete within 5 seconds...
@@ -772,9 +688,19 @@ const HybridWallet = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-green-700 dark:text-green-300">Balance:</span>
-                        <span className="text-xl font-bold text-green-800 dark:text-green-200">
-                          {DecimalUtils.formatDisplay(agriWallet.balance_wei || '0', 4, true)} KRSI
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-green-800 dark:text-green-200">
+                            {DecimalUtils.formatDisplay(agriWallet.balance_wei || '0', 4, true)} KRSI
+                          </span>
+                          <button
+                            onClick={refreshWalletData}
+                            disabled={loading}
+                            className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:bg-gray-400"
+                            title="Refresh balance from database"
+                          >
+                            🔄
+                          </button>
+                        </div>
                       </div>
                    <div className="flex items-center justify-between">
                      <span className="text-green-700 dark:text-green-300">Wallet Type:</span>

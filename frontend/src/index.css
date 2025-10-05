@@ -12,6 +12,43 @@
 }
 
 @layer components {
+  /* AgriFinance Color Variables */
+  .agri-green {
+    @apply bg-green-600;
+  }
+  
+  .agri-green-light {
+    @apply bg-green-500;
+  }
+  
+  .text-agri-green {
+    @apply text-green-600;
+  }
+  
+  .text-agri-green-light {
+    @apply text-green-500;
+  }
+  
+  .border-agri-green {
+    @apply border-green-600;
+  }
+  
+  .ring-agri-green {
+    @apply ring-green-600;
+  }
+  
+  .focus\:ring-agri-green:focus {
+    @apply ring-green-600;
+  }
+  
+  .focus\:border-agri-green:focus {
+    @apply border-green-600;
+  }
+  
+  .hover\:bg-agri-green-light:hover {
+    @apply bg-green-500;
+  }
+
   .agri-card {
     @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700;
   }

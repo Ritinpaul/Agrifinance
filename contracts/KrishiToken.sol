@@ -21,9 +21,9 @@ contract KrishiToken is ERC20, ERC20Burnable, ERC20Pausable, AccessControl, Reen
     bytes32 public constant STAKING_ROLE = keccak256("STAKING_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     
-    // Tokenomics
-    uint256 public constant INITIAL_SUPPLY = 100_000_000 * 10**18; // 100 million KRSI
-    uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10**18; // 1 billion KRSI max
+    // Tokenomics (using 6 decimals instead of 18 to avoid bigint overflow)
+    uint256 public constant INITIAL_SUPPLY = 100_000_000 * 10**6; // 100 million KRSI
+    uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10**6; // 1 billion KRSI max
     uint256 public constant STAKING_REWARD_RATE = 5; // 5% annual reward rate
     uint256 public constant BURN_RATE = 2; // 2% burn rate on transfers
     
@@ -61,7 +61,7 @@ contract KrishiToken is ERC20, ERC20Burnable, ERC20Pausable, AccessControl, Reen
     uint256 public totalBurnedAmount;
     uint256 public nextProposalId = 1;
     uint256 public stakingLockPeriod = 30 days;
-    uint256 public governanceThreshold = 1000 * 10**18; // 1000 KRSI to propose
+    uint256 public governanceThreshold = 1000 * 10**6; // 1000 KRSI to propose
     
     // Events
     event TokensStaked(address indexed user, uint256 amount, uint256 lockPeriod);
@@ -258,7 +258,7 @@ contract KrishiToken is ERC20, ERC20Burnable, ERC20Pausable, AccessControl, Reen
      * @dev Distribute tokens via faucet (for testing)
      */
     function faucetDistribute(address recipient, uint256 amount) external onlyRole(MINTER_ROLE) {
-        require(amount <= 1000 * 10**18, "Faucet limit exceeded"); // Max 1000 KRSI per distribution
+        require(amount <= 1000 * 10**6, "Faucet limit exceeded"); // Max 1000 KRSI per distribution
         require(totalSupply() + amount <= MAX_SUPPLY, "Exceeds max supply");
         
         _mint(recipient, amount);

@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useWeb3 } from '../context/Web3Context';
-import { useSupabase } from '../context/SupabaseContext';
-import DemoSeeder from '../components/DemoSeeder';
+import { useAuth } from '../context/AuthContext';
 import GuidedTour from '../components/GuidedTour';
 
 const Home = () => {
-  const { address, connectWallet } = useWeb3();
-  const { user } = useSupabase();
+  // Web3 is optional - handle gracefully if not available
+  let web3Data = { address: null, connectWallet: () => {} };
+  try {
+    const web3 = useWeb3();
+    web3Data = web3;
+  } catch (error) {
+    console.log('Web3 not available:', error.message);
+  }
+  
+  const { address, connectWallet } = web3Data;
+  const { user } = useAuth();
   const [showTour, setShowTour] = useState(false);
 
   const features = [
@@ -114,7 +122,7 @@ const Home = () => {
                   </div>
                   <div className="ml-3">
                     <p className="text-blue-700 dark:text-blue-300 font-medium text-sm">
-                      Connect your MetaMask wallet for blockchain features
+                      Connect your MetaMask wallet or use in-app wallet for blockchain features
                     </p>
                   </div>
                 </div>
@@ -148,13 +156,6 @@ const Home = () => {
               </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Demo Setup Section */}
-      <section className="py-16 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <DemoSeeder onComplete={() => setShowTour(true)} />
         </div>
       </section>
 

@@ -112,7 +112,7 @@ contract AgriFinanceDAO is ERC20, Ownable, ReentrancyGuard {
     
     constructor() ERC20("AgriFinance Governance Token", "AFG") {
         // Initial supply will be distributed through farming and platform participation
-        _mint(msg.sender, 1000000 * 10**18); // 1M tokens for initial distribution
+        _mint(msg.sender, 1000000 * 10**6); // 1M tokens for initial distribution (6 decimals)
     }
     
     // ============ MODIFIERS ============

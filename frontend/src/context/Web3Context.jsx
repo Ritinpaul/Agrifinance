@@ -13,6 +13,8 @@ export const useWeb3 = () => {
 };
 
 export const Web3Provider = ({ children }) => {
+  console.log('🌐 Web3Provider initializing...');
+  
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -107,7 +109,7 @@ export const Web3Provider = ({ children }) => {
 
   // Check if MetaMask is installed
   const isMetaMaskInstalled = () => {
-    return typeof window.ethereum !== 'undefined';
+    return typeof window !== 'undefined' && typeof window.ethereum !== 'undefined';
   };
 
   // Connect to MetaMask
@@ -248,6 +250,9 @@ export const Web3Provider = ({ children }) => {
   // Check connection status on mount
   useEffect(() => {
     const checkConnection = async () => {
+      // Only run in browser environment
+      if (typeof window === 'undefined') return;
+      
       if (isMetaMaskInstalled() && window.ethereum.selectedAddress) {
         try {
           const accounts = await window.ethereum.request({
@@ -276,6 +281,7 @@ export const Web3Provider = ({ children }) => {
           }
         } catch (err) {
           console.error('Error checking connection:', err);
+          setError(err.message);
         }
       }
     };
@@ -333,7 +339,7 @@ export const Web3Provider = ({ children }) => {
     chainId,
     isConnected,
     isLoading,
-    error,
+    error: error ? error.message || String(error) : null,
     contracts,
     krishiTokenContract: contracts.krishiToken,
     nftLandContract: contracts.nftLand,
@@ -351,6 +357,8 @@ export const Web3Provider = ({ children }) => {
     setNFTPrice,
   };
 
+  console.log('🌐 Web3Provider rendering with value:', { account, isConnected, isLoading, error });
+  
   return (
     <Web3Context.Provider value={value}>
       {children}
