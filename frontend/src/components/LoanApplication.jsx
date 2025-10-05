@@ -37,7 +37,6 @@ const LoanApplication = () => {
     setLoading(true);
     try {
       // Mock loan application submission
-      console.log('Submitting loan application:', formData);
       alert('Loan application submitted successfully!');
     } catch (error) {
       console.error('Error submitting loan application:', error);

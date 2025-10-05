@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { CreditCardIcon, BanknotesIcon, BuildingLibraryIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 // Fallback ChevronDownIcon component
 const ChevronDownIcon = ({ className }) => (
@@ -40,25 +41,25 @@ const DigitalAssetsDropdown = () => {
       name: 'Wallet',
       path: '/hybrid-wallet',
       description: 'Manage your mobile and blockchain wallets',
-      icon: '💳'
+      Icon: CreditCardIcon
     },
     {
       name: 'Staking',
       path: '/staking',
       description: 'Stake KRSI tokens and earn rewards',
-      icon: '🥩'
+      Icon: BanknotesIcon
     },
     {
       name: 'DAO',
       path: '/dao',
       description: 'Participate in community governance',
-      icon: '🏛️'
+      Icon: BuildingLibraryIcon
     },
     {
       name: 'Transactions',
       path: '/transactions',
       description: 'View your transaction history',
-      icon: '📊'
+      Icon: ChartBarIcon
     }
   ];
 
@@ -98,7 +99,7 @@ const DigitalAssetsDropdown = () => {
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-xl">{asset.icon}</span>
+                    <asset.Icon className="h-5 w-5 text-gray-500" />
                     <div className="flex-1">
                       <span className={`text-sm font-medium ${
                         isActive(asset.path) ? 'text-green-700 dark:text-green-300' : 'text-gray-900 dark:text-gray-100'

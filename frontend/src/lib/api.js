@@ -39,10 +39,7 @@ class ApiClient {
     };
 
     try {
-      console.log(`🚀 API Request: ${config.method || 'GET'} ${url}`);
       const response = await fetch(url, config);
-      
-      console.log(`📊 API Response: ${response.status} ${response.statusText}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -50,10 +47,9 @@ class ApiClient {
       }
       
       const data = await response.json();
-      console.log(`✅ API Success:`, data);
       return { data, error: null };
     } catch (error) {
-      console.error(`❌ API Error:`, error);
+      // Keep minimal error propagation without noisy logs
       return { data: null, error: error.message || String(error) };
     }
   }
@@ -233,6 +229,12 @@ class ApiClient {
   }
 
   // NFT methods
+  async createNFT(nftData) {
+    return this.request('/nfts', {
+      method: 'POST',
+      body: JSON.stringify(nftData),
+    });
+  }
   async purchaseNFT(purchaseData) {
     return this.request('/nft/purchase', {
       method: 'POST',
@@ -244,6 +246,13 @@ class ApiClient {
     return this.request('/nft/transfer', {
       method: 'POST',
       body: JSON.stringify(transferData),
+    });
+  }
+
+  async setNFTPrice({ nft_id, token_id, price_wei }) {
+    return this.request('/nft/set-price', {
+      method: 'POST',
+      body: JSON.stringify({ nft_id, token_id, price_wei }),
     });
   }
 

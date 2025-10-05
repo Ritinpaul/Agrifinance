@@ -6,33 +6,15 @@ const LoanManagement = () => {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    // Mock data - replace with real API call
-    const mockLoans = [
-      {
-        id: 1,
-        borrower: '0x1234...5678',
-        amount: 5000,
-        interestRate: 12,
-        duration: 180,
-        creditScore: 750,
-        purpose: 'Irrigation Equipment',
-        status: 'pending',
-        createdAt: new Date('2024-01-15')
-      },
-      {
-        id: 2,
-        borrower: '0x2345...6789',
-        amount: 3000,
-        interestRate: 10,
-        duration: 90,
-        creditScore: 680,
-        purpose: 'Seeds and Fertilizers',
-        status: 'active',
-        createdAt: new Date('2024-01-10')
+    const load = async () => {
+      try {
+        // Placeholder removed: load empty until backend loans API exists
+        setLoans([]);
+      } catch (e) {
+        setLoans([]);
       }
-    ];
-    
-    setLoans(mockLoans);
+    };
+    load();
   }, []);
 
   const handleApproveLoan = async (loanId) => {

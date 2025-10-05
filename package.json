@@ -17,7 +17,8 @@
     "setup-supabase": "node scripts/setup-supabase.js",
     "cleanup-db": "node scripts/run-cleanup.js",
     "fix-cors": "node scripts/fix-cors-csp.js",
-    "test-db": "node scripts/test-database.js"
+    "test-db": "node scripts/test-database.js",
+    "e2e:set-price": "node --env-file=.env scripts/e2e-set-price-test.js"
   },
   "keywords": [],
   "author": "",

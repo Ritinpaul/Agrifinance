@@ -72,7 +72,6 @@ const Staking = () => {
 
       if (result.data) {
         toast.success('Tokens staked successfully!');
-        console.log('Staking transaction:', result.data);
         
         // Reload positions
         await loadPositions();
@@ -99,7 +98,6 @@ const Staking = () => {
       
       if (tx) {
         toast.success('Tokens unstaked successfully!');
-        console.log('Unstaking transaction:', tx);
         
         // Reload positions
         await loadPositions();
@@ -120,7 +118,6 @@ const Staking = () => {
       
       if (tx) {
         toast.success('Rewards claimed successfully!');
-        console.log('Claim rewards transaction:', tx);
         
         // Reload positions
         await loadPositions();

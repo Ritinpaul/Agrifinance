@@ -56,7 +56,6 @@ const QRCodeScanner = ({ onScanSuccess, onScanError, className = "" }) => {
         if (errorMessage.includes("NotFoundException")) {
           return; // Ignore "No QR code found" errors
         }
-        console.log("QR Code scan error:", errorMessage);
       }
     );
   };
@@ -73,7 +72,6 @@ const QRCodeScanner = ({ onScanSuccess, onScanError, className = "" }) => {
 
   // Handle successful scan
   const handleScanSuccess = (decodedText, decodedResult) => {
-    console.log("QR Code detected:", decodedText);
     setScanResult(decodedText);
     
     // Stop scanning after successful detection

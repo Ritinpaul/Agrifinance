@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { EyeIcon, EyeSlashIcon, ShieldCheckIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../context/ThemeContext';
-import { useSupabase } from '../context/SupabaseContext';
+import adminApi from '../lib/api';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -12,7 +12,7 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { isDarkMode, toggleTheme } = useTheme();
-  const { signIn } = useSupabase();
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,36 +20,19 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-      // Try Supabase authentication first
-      const { data, error } = await signIn(formData.email, formData.password);
-      
-      if (error) {
-        // Fallback to demo authentication if Supabase is not configured
-        if (formData.email === 'admin@agrifinance.com' && formData.password === 'admin123') {
-          const mockAdmin = {
-            id: '1',
-            email: formData.email,
-            name: 'Admin User',
-            role: 'admin'
-          };
-          const mockToken = 'demo-token-' + Date.now();
-          onLogin(mockAdmin, mockToken);
-        } else {
-          setError('Invalid credentials. Please use the demo credentials provided.');
-        }
-      } else if (data.user) {
-        // Successful Supabase authentication
-        const adminUser = {
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.user_metadata?.name || 'Admin User',
-          role: 'admin'
-        };
-        onLogin(adminUser, data.session?.access_token);
-      }
+      // Use backend auth
+      const result = await adminApi.request('/auth/signin', {
+        method: 'POST',
+        body: JSON.stringify({ email: formData.email, password: formData.password })
+      });
+      const token = result?.token || result?.data?.token;
+      const user = result?.user || result?.data?.user;
+      if (!token || !user) throw new Error('Invalid login response');
+      adminApi.setToken(token);
+      onLogin({ id: user.id, email: user.email, name: user.first_name || user.email, role: user.role || 'admin' }, token);
     } catch (err) {
       console.error('Login error:', err);
-      setError('Login failed. Please try again.');
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -187,16 +170,7 @@ const Login = ({ onLogin }) => {
             </button>
           </form>
           
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-            <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Demo Credentials</h3>
-              <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <p><span className="font-medium">Email:</span> admin@agrifinance.com</p>
-                <p><span className="font-medium">Password:</span> admin123</p>
-              </div>
-            </div>
-          </div>
+          {/* No demo credentials; uses backend auth */}
         </div>
         
         {/* Footer */}

@@ -11,7 +11,6 @@ const Home = () => {
     const web3 = useWeb3();
     web3Data = web3;
   } catch (error) {
-    console.log('Web3 not available:', error.message);
   }
   
   const { address, connectWallet } = web3Data;

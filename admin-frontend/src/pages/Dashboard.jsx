@@ -7,6 +7,7 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import adminApi from '../lib/api';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -21,42 +22,14 @@ const Dashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
-    // Mock data - replace with real API calls
-    setStats({
-      totalUsers: 1247,
-      activeLoans: 89,
-      totalNFTs: 156,
-      pendingVerifications: 23,
-      platformRevenue: 45678,
-      riskAlerts: 3
-    });
-
-    setRecentActivity([
-      {
-        id: 1,
-        type: 'loan_application',
-        user: 'Rajesh Kumar',
-        amount: 5000,
-        timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        status: 'pending'
-      },
-      {
-        id: 2,
-        type: 'nft_verification',
-        user: 'Priya Sharma',
-        amount: null,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-        status: 'pending'
-      },
-      {
-        id: 3,
-        type: 'batch_verification',
-        user: 'Amit Patel',
-        amount: null,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4),
-        status: 'approved'
-      }
-    ]);
+    const load = async () => {
+      try {
+        const nftData = await adminApi.getNFTs().catch(() => ({ nfts: [] }));
+        const nftItems = nftData?.nfts || [];
+        setStats((s) => ({ ...s, totalNFTs: nftItems.length }));
+      } catch {}
+    };
+    load();
   }, []);
 
   const formatCurrency = (amount) => {

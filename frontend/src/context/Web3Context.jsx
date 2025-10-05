@@ -13,7 +13,6 @@ export const useWeb3 = () => {
 };
 
 export const Web3Provider = ({ children }) => {
-  console.log('🌐 Web3Provider initializing...');
   
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -153,7 +152,6 @@ export const Web3Provider = ({ children }) => {
       window.ethereum.on('chainChanged', handleChainChanged);
 
     } catch (err) {
-      console.error('Error connecting wallet:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -280,7 +278,6 @@ export const Web3Provider = ({ children }) => {
             window.ethereum.on('chainChanged', handleChainChanged);
           }
         } catch (err) {
-          console.error('Error checking connection:', err);
           setError(err.message);
         }
       }
@@ -322,11 +319,9 @@ export const Web3Provider = ({ children }) => {
             ],
           });
         } catch (addError) {
-          console.error('Error adding Amoy network:', addError);
           setError('Failed to add Amoy network');
         }
       } else {
-        console.error('Error switching to Amoy:', switchError);
         setError('Failed to switch to Amoy network');
       }
     }
@@ -357,8 +352,6 @@ export const Web3Provider = ({ children }) => {
     setNFTPrice,
   };
 
-  console.log('🌐 Web3Provider rendering with value:', { account, isConnected, isLoading, error });
-  
   return (
     <Web3Context.Provider value={value}>
       {children}

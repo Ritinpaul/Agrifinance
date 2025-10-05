@@ -44,7 +44,6 @@ const Wallet = () => {
     try {
       // Simulate transfer
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Transfer:', transferAmount, 'to', transferRecipient);
       loadWalletData();
     } catch (error) {
       console.error('Error transferring:', error);

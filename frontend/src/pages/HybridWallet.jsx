@@ -75,19 +75,14 @@ const HybridWallet = () => {
 
   // Sync wallet to database - REAL DATABASE INTEGRATION
   const syncWalletToDatabase = async () => {
-    console.log('🚀 SYNC BUTTON CLICKED!');
+    
     
     if (!agriWallet || !user?.id) {
       toast.error('No wallet to sync');
       return;
     }
 
-    console.log('🔄 Starting sync...');
-    console.log('📊 Wallet to sync:', {
-      address: agriWallet.address,
-      user_id: user.id,
-      balance: agriWallet.balance_wei
-    });
+    
     
     setSyncing(true);
     
@@ -103,8 +98,7 @@ const HybridWallet = () => {
         throw new Error(result.error.message || 'Sync failed');
       }
 
-      console.log('✅ Wallet synced successfully!', result.data);
-      console.log('📊 Updated wallet balance_wei:', result.data.wallet?.balance_wei);
+      
       setIsWalletSynced(true);
       toast.success('Wallet synced to database successfully!');
       
@@ -118,24 +112,24 @@ const HybridWallet = () => {
       await loadWalletData();
       
     } catch (error) {
-      console.error('❌ Sync error:', error);
+      
       toast.error(`Sync failed: ${error.message}`);
     } finally {
-      console.log('✅ Sync operation completed');
+      
       setSyncing(false);
     }
   };
 
   // Manual sync reset function
   const resetSyncState = () => {
-    console.log('🔄 Manually resetting sync state');
+    
     setSyncing(false);
     toast.info('Sync state reset - you can try again');
   };
 
   // Manual refresh function to get latest wallet data from database
   const refreshWalletData = async () => {
-    console.log('🔄 Manually refreshing wallet data...');
+    
     setLoading(true);
     try {
       await loadWalletData();
@@ -155,7 +149,7 @@ const HybridWallet = () => {
       return;
     }
     
-    console.log('🚀 Creating wallet immediately...');
+    
     const persistentWallet = generatePersistentWallet(user.id);
     
     const immediateWallet = {
@@ -208,7 +202,7 @@ const HybridWallet = () => {
   // Generate deterministic wallet address from user ID (persistent) - SIMPLE APPROACH
   const generatePersistentWallet = (userId) => {
     try {
-      console.log('🔧 Generating persistent wallet for user:', userId);
+      
       
       // SIMPLE APPROACH: Create deterministic private key from user ID
       // This is much more reliable than mnemonic generation
@@ -218,7 +212,7 @@ const HybridWallet = () => {
       // Create wallet from private key
       const wallet = new ethers.Wallet(privateKey);
       
-      console.log('✅ Persistent wallet generated successfully:', wallet.address);
+      
       
       return {
         address: wallet.address,
@@ -226,18 +220,18 @@ const HybridWallet = () => {
         mnemonic: null // No mnemonic needed for this approach
       };
     } catch (error) {
-      console.error('❌ Error generating persistent wallet:', error);
+      
       
       // Fallback: Use a different seed approach
       try {
-        console.log('🔄 Trying alternative seed approach...');
+        
         
         // Alternative: Use user ID directly as seed
         const altSeed = ethers.id(userId + 'agrifinance-alt-seed');
         const altPrivateKey = ethers.keccak256(altSeed);
         const altWallet = new ethers.Wallet(altPrivateKey);
         
-        console.log('✅ Alternative wallet generated:', altWallet.address);
+        
         
         return {
           address: altWallet.address,
@@ -245,15 +239,15 @@ const HybridWallet = () => {
           mnemonic: null
         };
       } catch (fallbackError) {
-        console.error('❌ Alternative approach also failed:', fallbackError);
+        
         
         // Last resort: Use a fixed seed for this user
-        console.log('🚨 Using fixed seed as last resort');
+        
         const fixedSeed = ethers.id('fixed-seed-' + userId);
         const fixedPrivateKey = ethers.keccak256(fixedSeed);
         const fixedWallet = new ethers.Wallet(fixedPrivateKey);
         
-        console.log('✅ Fixed seed wallet generated:', fixedWallet.address);
+        
         
         return {
           address: fixedWallet.address,
@@ -266,11 +260,10 @@ const HybridWallet = () => {
 
   // Load wallet data - REAL DATABASE INTEGRATION
   const loadWalletData = async () => {
-    console.log('🔄 Starting wallet load...');
-    console.log('User:', user?.id ? 'Present' : 'Missing');
+    
     
     if (!user?.id) {
-      console.log('❌ No user ID, stopping loading');
+      
       setLoading(false);
       return;
     }
@@ -279,20 +272,19 @@ const HybridWallet = () => {
     
     try {
       // Try to get existing wallet from database first
-      console.log('🔍 Checking for existing wallet in database...');
+      
       
       const result = await apiClient.getWallet();
       
       if (result.data && result.data.wallet) {
-        console.log('✅ Found existing wallet:', result.data.wallet.address);
-        console.log('📊 Loaded wallet balance_wei:', result.data.wallet.balance_wei);
+        
         setAgriWallet(result.data.wallet);
         setIsWalletSynced(true); // Wallet is already synced
         
         // Set the blockchain balance from the database
         setBlockchainBalance(ethers.formatUnits(result.data.wallet.balance_wei || '0', 6));
       } else {
-        console.log('ℹ️ No existing wallet found, creating new one');
+        
         
         // Create wallet locally
         const persistentWallet = generatePersistentWallet(user.id);
@@ -317,7 +309,7 @@ const HybridWallet = () => {
           }
         };
         
-        console.log('✅ Created local wallet:', localWallet.address);
+        
         setAgriWallet(localWallet);
         setIsWalletSynced(false); // Local wallet needs to be synced
         
@@ -327,7 +319,7 @@ const HybridWallet = () => {
         }
       }
     } catch (error) {
-      console.log('⚠️ Database failed, creating local wallet:', error.message);
+      
       
       // Create wallet locally as fallback
       const persistentWallet = generatePersistentWallet(user.id);
@@ -352,7 +344,7 @@ const HybridWallet = () => {
         }
       };
       
-      console.log('✅ Created local wallet:', localWallet.address);
+      
       setAgriWallet(localWallet);
       setIsWalletSynced(false); // Local wallet needs to be synced
       
@@ -364,41 +356,41 @@ const HybridWallet = () => {
       // Load blockchain balance (non-blocking) - IMPROVED ERROR HANDLING
       if (isConnected && krishiTokenContract && account) {
         try {
-          console.log('🔗 Loading blockchain balance...');
+          
           const balance = await krishiTokenContract.balanceOf(account);
           setBlockchainBalance(balance.toString());
-          console.log('✅ Blockchain balance loaded:', balance.toString());
+          
         } catch (error) {
-          console.log('⚠️ Failed to load blockchain balance (non-critical):', error.message);
+          
           setBlockchainBalance('0');
         }
       } else {
-        console.log('ℹ️ Blockchain not connected, setting balance to 0');
+        
         setBlockchainBalance('0');
       }
       
-      console.log('✅ Wallet loading completed');
+      
       setLoading(false);
     }
   };
 
   useEffect(() => {
     if (user?.id) {
-      console.log('🚀 User detected, starting wallet load...');
+      
       loadWalletData();
     } else {
-      console.log('❌ No user detected, stopping loading');
+      
       setLoading(false);
     }
     
     // Safety timeout - force loading to stop after 5 seconds no matter what
     const safetyTimeout = setTimeout(() => {
-      console.log('🚨 Safety timeout triggered - forcing loading to stop');
+      
       setLoading(false);
       
       // If still no wallet, create emergency one
       if (!agriWallet && user?.id) {
-        console.log('🚨 Creating emergency wallet due to timeout');
+        
         const persistentWallet = generatePersistentWallet(user.id);
         const emergencyWallet = {
           id: 'timeout-emergency-' + user.id,

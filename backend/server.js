@@ -9,11 +9,32 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Silence non-essential logs by default to keep backend output clean
+// Set VERBOSE_LOGS=true to re-enable console.log output
+if (process.env.VERBOSE_LOGS !== 'true') {
+  // Keep warnings and errors; silence info logs
+  // eslint-disable-next-line no-console
+  console.log = function noop() {};
+}
+
+// Middleware - Allow both user and admin frontends
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    process.env.ADMIN_FRONTEND_URL || 'http://localhost:5175'
+  ],
   credentials: true
 }));
+
+// Add security headers for CSP
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
 app.use(express.json());
 
 // Database connection
@@ -24,11 +45,235 @@ const pool = new Pool({
   }
 });
 
-// Test database connection
-pool.on('connect', () => {
-  console.log('✅ Connected to NeonDB');
+// Print a single DB connection status line at startup
+const printStartup = (message) => {
+  try { process.stdout.write(message + '\n'); } catch (_) {}
+};
+
+(async () => {
+  try {
+    await pool.query('SELECT 1');
+    printStartup('✅ Connected to NeonDB');
+  } catch (err) {
+    console.error('❌ Database connection failed:', err?.message || err);
+  }
+})();
+
+// JWT middleware (define early so it can be used in routes)
+const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Get user from database
+    const result = await pool.query(
+      'SELECT id, email, first_name, last_name, phone, role, profile_completed FROM users WHERE id = $1',
+      [decoded.userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+    
+    req.user = result.rows[0];
+    next();
+  } catch (error) {
+    console.error('JWT verification error:', error);
+    return res.status(403).json({ error: 'Invalid token' });
+  }
+};
+
+// Debug route removed for clean output
+
+// Get pending admin approvals with NFT details
+app.get('/api/admin/approvals/pending', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT 
+        aa.*,
+        n.name as nft_name,
+        n.description as nft_description,
+        n.image_url as nft_image_url,
+        n.token_id as nft_token_id,
+        n.owner_id as nft_owner,
+        n.price_wei as nft_price_wei,
+        u.email as user_email,
+        u.first_name as user_first_name,
+        u.last_name as user_last_name
+      FROM admin_approvals aa
+      LEFT JOIN nfts n ON (aa.request_data->>'nft_id')::uuid = n.id
+      LEFT JOIN users u ON aa.user_id = u.id
+      WHERE aa.status = 'pending' 
+      ORDER BY aa.created_at DESC`
+    );
+    res.json({ approvals: result.rows });
+  } catch (error) {
+    console.error('Error fetching approvals:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
+// Get user's own approvals
+app.get('/api/admin/approvals/my-approvals', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool.query(
+      `SELECT * FROM admin_approvals WHERE user_id = $1 ORDER BY created_at DESC`,
+      [userId]
+    );
+    res.json({ approvals: result.rows });
+  } catch (error) {
+    console.error('Error fetching user approvals:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin approve request
+app.post('/api/admin/approvals/:id/approve', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { admin_notes } = req.body;
+    const adminId = req.user.id;
+
+    // Check if user is admin
+    const userCheck = await pool.query('SELECT role FROM users WHERE id = $1', [adminId]);
+    if (!userCheck.rows[0] || userCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized: Admin access required' });
+    }
+
+    // Update approval status
+    const result = await pool.query(
+      `UPDATE admin_approvals 
+       SET status = 'approved', 
+           admin_notes = $1, 
+           approved_by = $2, 
+           approved_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING *`,
+      [admin_notes || 'Approved by admin', adminId, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Approval request not found' });
+    }
+
+    // If it's an NFT minting approval, update the NFT status
+    const approval = result.rows[0];
+    const nftId = approval.request_data?.nft_id;
+    if (approval.approval_type === 'nft_mint' && nftId) {
+      await pool.query(
+        `UPDATE nfts SET is_approved = true WHERE id = $1`,
+        [nftId]
+      );
+    }
+
+    res.json({ success: true, approval: approval });
+  } catch (error) {
+    console.error('Error approving request:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin reject request
+app.post('/api/admin/approvals/:id/reject', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { admin_notes } = req.body;
+    const adminId = req.user.id;
+
+    // Check if user is admin
+    const userCheck = await pool.query('SELECT role FROM users WHERE id = $1', [adminId]);
+    if (!userCheck.rows[0] || userCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized: Admin access required' });
+    }
+
+    // Update approval status
+    const result = await pool.query(
+      `UPDATE admin_approvals 
+       SET status = 'rejected', 
+           admin_notes = $1, 
+           approved_by = $2, 
+           approved_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING *`,
+      [admin_notes || 'Rejected by admin', adminId, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Approval request not found' });
+    }
+
+    res.json({ success: true, approval: result.rows[0] });
+  } catch (error) {
+    console.error('Error rejecting request:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin: Get all users
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    
+    // Check if user is admin
+    const userCheck = await pool.query('SELECT role FROM users WHERE id = $1', [adminId]);
+    if (!userCheck.rows[0] || userCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized: Admin access required' });
+    }
+
+    const result = await pool.query(
+      `SELECT id, email, first_name, last_name, role, is_verified, created_at, last_login 
+       FROM users 
+       ORDER BY created_at DESC`
+    );
+    
+    res.json({ users: result.rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin: Get user by ID
+app.get('/api/admin/users/:id', authenticateToken, async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id } = req.params;
+    
+    // Check if user is admin
+    const userCheck = await pool.query('SELECT role FROM users WHERE id = $1', [adminId]);
+    if (!userCheck.rows[0] || userCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized: Admin access required' });
+    }
+
+    const result = await pool.query(
+      `SELECT id, email, first_name, last_name, role, is_verified, created_at, last_login 
+       FROM users 
+       WHERE id = $1`,
+      [id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ user: result.rows[0] });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Test database connection
+// Keep error reporting for pool errors
 pool.on('error', (err) => {
   console.error('❌ Database connection error:', err);
 });
@@ -176,6 +421,40 @@ const initializeDatabase = async () => {
               CREATE TRIGGER update_nfts_updated_at 
                   BEFORE UPDATE ON nfts 
                   FOR EACH ROW EXECUTE FUNCTION update_nfts_updated_at_column();
+            `);
+
+            // Create Admin Approvals table if it doesn't exist
+            await pool.query(`
+              CREATE TABLE IF NOT EXISTS admin_approvals (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES users(id),
+                approval_type VARCHAR(100) NOT NULL,
+                status VARCHAR(32) NOT NULL DEFAULT 'pending',
+                request_data JSONB,
+                admin_notes TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+              );
+            `);
+
+            await pool.query('CREATE INDEX IF NOT EXISTS idx_admin_approvals_status ON admin_approvals(status);');
+            await pool.query('CREATE INDEX IF NOT EXISTS idx_admin_approvals_type ON admin_approvals(approval_type);');
+
+            await pool.query(`
+              CREATE OR REPLACE FUNCTION update_admin_approvals_updated_at_column()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                  NEW.updated_at = NOW();
+                  RETURN NEW;
+              END;
+              $$ language 'plpgsql';
+            `);
+
+            await pool.query('DROP TRIGGER IF EXISTS update_admin_approvals_updated_at ON admin_approvals;');
+            await pool.query(`
+              CREATE TRIGGER update_admin_approvals_updated_at 
+                  BEFORE UPDATE ON admin_approvals 
+                  FOR EACH ROW EXECUTE FUNCTION update_admin_approvals_updated_at_column();
             `);
 
             // Create DAO tables
@@ -610,36 +889,6 @@ const ensureWalletTableSchema = async () => {
     }
   } catch (error) {
     console.error('Schema ensure error:', error);
-  }
-};
-
-// JWT middleware
-const authenticateToken = async (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Get user from database
-    const result = await pool.query(
-      'SELECT id, email, first_name, last_name, phone, role, profile_completed FROM users WHERE id = $1',
-      [decoded.userId]
-    );
-    
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'User not found' });
-    }
-    
-    req.user = result.rows[0];
-    next();
-  } catch (error) {
-    console.error('JWT verification error:', error);
-    return res.status(403).json({ error: 'Invalid token' });
   }
 };
 
@@ -1081,7 +1330,6 @@ app.get('/api/nfts', async (req, res) => {
       `SELECT n.*, u.first_name, u.last_name 
        FROM nfts n 
        LEFT JOIN users u ON n.owner_id = u.id 
-       WHERE n.is_listed = true 
        ORDER BY n.created_at DESC`
     );
     
@@ -1093,6 +1341,76 @@ app.get('/api/nfts', async (req, res) => {
   } catch (error) {
     console.error('Error fetching NFTs:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Create a draft NFT (database-only)
+app.post('/api/nfts', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, description, image_url, price_krsi } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+
+    // price_krsi is optional; convert to on-chain units (6 decimals) if provided
+    let priceWei = '0';
+    if (price_krsi !== undefined && price_krsi !== null && String(price_krsi).trim() !== '') {
+      // store as bigint string with 6 decimals (KRSI)
+      const parts = String(price_krsi).split('.');
+      const whole = parts[0] || '0';
+      const frac = (parts[1] || '').padEnd(6, '0').slice(0, 6);
+      priceWei = `${BigInt(whole)}${frac}`;
+    }
+
+    const result = await pool.query(
+      `INSERT INTO nfts (name, description, image_url, price_wei, owner_id, is_listed)
+       VALUES ($1, $2, $3, $4::bigint, $5, $6)
+       RETURNING *`,
+      [name, description || null, image_url || null, priceWei, userId, false]
+    );
+
+    const nft = result.rows[0];
+
+    // Ensure admin_approvals table exists (defensive for dev environments)
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS admin_approvals (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id UUID REFERENCES users(id),
+          approval_type VARCHAR(100) NOT NULL,
+          status VARCHAR(32) NOT NULL DEFAULT 'pending',
+          request_data JSONB,
+          admin_notes TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+      `);
+    } catch (e) {
+      // ignore if creation fails due to permissions; we'll still return NFT
+      console.warn('admin_approvals ensure skipped:', e.message);
+    }
+
+    // Create admin approval request for on-chain minting (best-effort)
+    try {
+      await pool.query(
+        `INSERT INTO admin_approvals (user_id, approval_type, status, request_data)
+         VALUES ($1, $2, $3, $4)`,
+        [userId, 'nft_mint', 'pending', JSON.stringify({ nft_id: nft.id, name, image_url, price_krsi, description })]
+      );
+    } catch (e) {
+      console.warn('admin approval insert failed:', e.message);
+    }
+
+    res.status(201).json({
+      message: 'NFT created successfully and approval requested',
+      nft
+    });
+  } catch (error) {
+    console.error('Error creating NFT:', error);
+    const message = error?.message || 'Internal server error';
+    res.status(500).json({ error: message });
   }
 });
 
@@ -1741,6 +2059,79 @@ app.post('/api/wallet/transfer', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Transfer error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Set NFT price endpoint
+app.post('/api/nft/set-price', authenticateToken, async (req, res) => {
+  try {
+    const { nft_id, token_id, price_wei } = req.body;
+
+    if (!price_wei || (!nft_id && !token_id)) {
+      return res.status(400).json({ error: 'price_wei and (nft_id or token_id) are required' });
+    }
+
+    // Update DB price if nft_id provided
+    if (nft_id) {
+      await pool.query(
+        `UPDATE nfts SET price_wei = $1::bigint, is_listed = true, updated_at = NOW() WHERE id = $2`,
+        [price_wei, nft_id]
+      );
+    } else {
+      // fallback by token_id
+      await pool.query(
+        `UPDATE nfts SET price_wei = $1::bigint, is_listed = true, updated_at = NOW() WHERE token_id = $2`,
+        [price_wei, token_id]
+      );
+    }
+
+    res.status(200).json({ message: 'NFT price set (DB only)' });
+  } catch (error) {
+    console.error('Set NFT price error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Alias: create NFT (to avoid 404s from some clients)
+app.post('/api/nft', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, description, image_url, price_krsi } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+
+    let priceWei = '0';
+    if (price_krsi !== undefined && price_krsi !== null && String(price_krsi).trim() !== '') {
+      const parts = String(price_krsi).split('.');
+      const whole = parts[0] || '0';
+      const frac = (parts[1] || '').padEnd(6, '0').slice(0, 6);
+      priceWei = `${BigInt(whole)}${frac}`;
+    }
+
+    const result = await pool.query(
+      `INSERT INTO nfts (name, description, image_url, price_wei, owner_id, is_listed)
+       VALUES ($1, $2, $3, $4::bigint, $5, $6)
+       RETURNING *`,
+      [name, description || null, image_url || null, priceWei, userId, false]
+    );
+
+    const nft = result.rows[0];
+    try {
+      await pool.query(
+        `INSERT INTO admin_approvals (user_id, approval_type, status, request_data)
+         VALUES ($1, $2, $3, $4)`,
+        [userId, 'nft_mint', 'pending', JSON.stringify({ nft_id: nft.id, name, image_url, price_krsi, description })]
+      );
+    } catch (e) {
+      console.warn('admin approval insert failed (alias route):', e.message);
+    }
+
+    res.status(201).json({ message: 'NFT created successfully and approval requested', nft });
+  } catch (error) {
+    console.error('Alias create NFT error:', error);
+    res.status(500).json({ error: error?.message || 'Internal server error' });
   }
 });
 
@@ -2774,8 +3165,27 @@ app.get('/api/wallet/transactions', authenticateToken, async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
+console.log('📡 About to start server on port', PORT);
+
+// Start server with error handling
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 NeonDB API server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 Server accessible on all network interfaces`);
+  console.log(`✅ Server is DEFINITELY listening now!`);
+});
+
+console.log('📡 app.listen() called, waiting for callback...');
+
+server.on('error', (error) => {
+  console.error('❌ Server error:', error.message);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`⚠️  Port ${PORT} is already in use`);
+  }
+  process.exit(1);
+});
+
+server.on('listening', () => {
+  const addr = server.address();
+  console.log(`🎧 Server is LISTENING on ${addr.address}:${addr.port}`);
 });

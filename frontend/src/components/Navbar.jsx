@@ -19,7 +19,6 @@ const Navbar = () => {
     const web3 = useWeb3();
     web3Data = web3;
   } catch (error) {
-    console.log('Web3 not available:', error.message);
   }
   
   const { account, isConnected, connectWallet, disconnectWallet, isLoading, error } = web3Data;
@@ -454,28 +453,28 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                     className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    💳 Wallet
+                    <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.75V8.25A2.25 2.25 0 0018.75 6h-13.5A2.25 2.25 0 003 8.25v7.5A2.25 2.25 0 005.25 18h13.5A2.25 2.25 0 0021 15.75V15M21 12h-3.375a1.125 1.125 0 100 2.25H21" /></svg> Wallet</span>
                   </Link>
                   <Link 
                     to="/staking" 
                     onClick={() => setMobileMenuOpen(false)}
                     className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    🥩 Staking
+                    <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-6-6h12" /></svg> Staking</span>
                   </Link>
                   <Link 
                     to="/dao" 
                     onClick={() => setMobileMenuOpen(false)}
                     className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    🏛️ DAO
+                    <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5l9-6 9 6M4.5 10.125h15M6 21h12M6 12.75v8.25M18 12.75v8.25" /></svg> DAO</span>
                   </Link>
                   <Link 
                     to="/transactions" 
                     onClick={() => setMobileMenuOpen(false)}
                     className="block px-3 py-2 rounded-md text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    📊 Transactions
+                    <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7.5 15.75l3-3 4.5 4.5M15 10.5l3-3" /></svg> Transactions</span>
                   </Link>
                 </div>
               </div>

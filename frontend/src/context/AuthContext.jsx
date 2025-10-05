@@ -14,24 +14,20 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  console.log('🔐 Simple AuthProvider initializing...');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Check authentication status on app initialization
   useEffect(() => {
-    console.log('🔐 AuthProvider mounted - checking auth status');
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
-      console.log('🔍 Checking auth status...');
       setLoading(true);
       
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        console.log('❌ No auth token found');
         setUser(null);
         setLoading(false);
         return;
@@ -40,15 +36,12 @@ export const AuthProvider = ({ children }) => {
       const result = await apiClient.getCurrentUser();
       
       if (result.data && result.data.user) {
-        console.log('✅ User is authenticated:', result.data.user);
         setUser(result.data.user);
       } else {
-        console.log('❌ No authenticated user');
         setUser(null);
         localStorage.removeItem('auth_token');
       }
     } catch (error) {
-      console.log('❌ Auth check failed:', error.message);
       setUser(null);
       localStorage.removeItem('auth_token');
     } finally {
@@ -58,7 +51,6 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (userData) => {
     try {
-      console.log('🚀 Signing up user:', userData);
       setLoading(true);
       
       const result = await apiClient.signUp(userData);
@@ -83,7 +75,6 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (credentials) => {
     try {
-      console.log('🔑 Signing in user:', credentials.email);
       setLoading(true);
       
       const result = await apiClient.signIn(credentials);
@@ -107,7 +98,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = () => {
-    console.log('👋 Signing out user');
     apiClient.setToken(null);
     setUser(null);
     toast.success('Signed out successfully');
@@ -115,7 +105,6 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      console.log('📝 Updating profile:', profileData);
       setLoading(true);
       
       const result = await apiClient.updateProfile(profileData);
@@ -139,20 +128,16 @@ export const AuthProvider = ({ children }) => {
 
   const testConnection = async () => {
     try {
-      console.log('🧪 Testing API connection...');
       const result = await apiClient.testConnection();
       
       if (result.data) {
-        console.log('✅ API connection test successful!');
         toast.success('API connection successful!');
         return { success: true, data: result.data };
       } else {
-        console.log('❌ API connection test failed');
         toast.error('API connection failed');
         return { success: false, error: result.error || 'API connection failed' };
       }
     } catch (error) {
-      console.error('Connection test error:', error);
       toast.error('Connection test failed: ' + error.message);
       return { success: false, error: error.message };
     }
@@ -169,8 +154,6 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus
   };
 
-  console.log('🔐 Simple AuthProvider rendering with value:', { user, loading });
-  
   return (
     <AuthContext.Provider value={value}>
       {children}

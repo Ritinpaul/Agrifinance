@@ -8,14 +8,59 @@ class BlockchainService {
   constructor() {
     this.provider = null;
     this.contracts = {};
-    this.contractAddresses = {
-      krishiToken: process.env.KRISHI_TOKEN_ADDRESS || '0x1234567890123456789012345678901234567890',
-      nftLand: process.env.NFT_LAND_ADDRESS || '0x1234567890123456789012345678901234567891',
-      loanContract: process.env.LOAN_CONTRACT_ADDRESS || '0x1234567890123456789012345678901234567892',
-      supplyChain: process.env.SUPPLY_CHAIN_ADDRESS || '0x1234567890123456789012345678901234567893'
-    };
-    
+    this.contractAddresses = this.loadContractAddresses();
     this.initializeProvider();
+  }
+
+  loadContractAddresses() {
+    try {
+      // Prefer explicit env vars if provided
+      if (
+        process.env.KRISHI_TOKEN_ADDRESS &&
+        process.env.NFT_LAND_ADDRESS &&
+        process.env.LOAN_CONTRACT_ADDRESS &&
+        process.env.SUPPLY_CHAIN_ADDRESS
+      ) {
+        return {
+          krishiToken: process.env.KRISHI_TOKEN_ADDRESS,
+          nftLand: process.env.NFT_LAND_ADDRESS,
+          loanContract: process.env.LOAN_CONTRACT_ADDRESS,
+          supplyChain: process.env.SUPPLY_CHAIN_ADDRESS,
+        };
+      }
+
+      // Fallback to deployments/amoy.json for local dev
+      const path = require('path');
+      const fs = require('fs');
+      const deploymentsPath = path.resolve(process.cwd(), 'deployments', 'amoy.json');
+      if (fs.existsSync(deploymentsPath)) {
+        const raw = fs.readFileSync(deploymentsPath, 'utf8');
+        const parsed = JSON.parse(raw);
+        const addresses = parsed.contracts || {};
+        return {
+          krishiToken: addresses.KrishiToken,
+          nftLand: addresses.NFTLand,
+          loanContract: addresses.LoanContract,
+          supplyChain: addresses.SupplyChain,
+        };
+      }
+
+      // Last resort stub addresses to avoid crashes
+      return {
+        krishiToken: '0x0000000000000000000000000000000000000000',
+        nftLand: '0x0000000000000000000000000000000000000000',
+        loanContract: '0x0000000000000000000000000000000000000000',
+        supplyChain: '0x0000000000000000000000000000000000000000',
+      };
+    } catch (e) {
+      console.error('❌ Failed to load contract addresses:', e);
+      return {
+        krishiToken: '0x0000000000000000000000000000000000000000',
+        nftLand: '0x0000000000000000000000000000000000000000',
+        loanContract: '0x0000000000000000000000000000000000000000',
+        supplyChain: '0x0000000000000000000000000000000000000000',
+      };
+    }
   }
 
   initializeProvider() {

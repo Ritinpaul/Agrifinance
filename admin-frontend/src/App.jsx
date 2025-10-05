@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
-import { SupabaseProvider } from './context/SupabaseContext';
 import AdminLayout from './components/AdminLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -44,30 +43,26 @@ function App() {
   if (!isAuthenticated) {
     return (
       <ThemeProvider>
-        <SupabaseProvider>
-          <Login onLogin={handleLogin} />
-        </SupabaseProvider>
+        <Login onLogin={handleLogin} />
       </ThemeProvider>
     );
   }
 
   return (
     <ThemeProvider>
-      <SupabaseProvider>
-        <Router>
-          <AdminLayout adminUser={adminUser} onLogout={handleLogout}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/users" element={<UserManagement />} />
-              <Route path="/nfts" element={<NFTManagement />} />
-              <Route path="/loans" element={<LoanManagement />} />
-              <Route path="/supply-chain" element={<SupplyChainManagement />} />
-              <Route path="/settings" element={<SystemSettings />} />
-            </Routes>
-          </AdminLayout>
-        </Router>
-      </SupabaseProvider>
+      <Router>
+        <AdminLayout adminUser={adminUser} onLogout={handleLogout}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/users" element={<UserManagement />} />
+            <Route path="/nfts" element={<NFTManagement />} />
+            <Route path="/loans" element={<LoanManagement />} />
+            <Route path="/supply-chain" element={<SupplyChainManagement />} />
+            <Route path="/settings" element={<SystemSettings />} />
+          </Routes>
+        </AdminLayout>
+      </Router>
     </ThemeProvider>
   );
 }

@@ -1,20 +1,36 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  BookOpenIcon,
+  RocketLaunchIcon,
+  UserIcon,
+  BanknotesIcon,
+  ShoppingCartIcon,
+  BoltIcon,
+  ShieldCheckIcon,
+  BeakerIcon,
+  GlobeAltIcon,
+  BuildingOfficeIcon,
+  QuestionMarkCircleIcon,
+  LinkIcon
+} from '@heroicons/react/24/outline';
 
 const Documentation = () => {
   const [activeSection, setActiveSection] = useState('overview');
 
   const sections = [
-    { id: 'overview', title: 'Overview', icon: '📖' },
-    { id: 'getting-started', title: 'Getting Started', icon: '🚀' },
-    { id: 'farmer-guide', title: 'Farmer Guide', icon: '👨‍🌾' },
-    { id: 'lender-guide', title: 'Lender Guide', icon: '💰' },
-    { id: 'buyer-guide', title: 'Buyer Guide', icon: '🛒' },
-    { id: 'features', title: 'Core Features', icon: '⚡' },
-    { id: 'innovation', title: 'Technical Innovation', icon: '🔬' },
-    { id: 'impact', title: 'Social Impact', icon: '🌍' },
-    { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
-    { id: 'faq', title: 'FAQ', icon: '❓' }
+    { id: 'overview', title: 'Overview', Icon: BookOpenIcon },
+    { id: 'getting-started', title: 'Getting Started', Icon: RocketLaunchIcon },
+    { id: 'farmer-guide', title: 'Farmer Guide', Icon: UserIcon },
+    { id: 'lender-guide', title: 'Lender Guide', Icon: BanknotesIcon },
+    { id: 'buyer-guide', title: 'Buyer Guide', Icon: ShoppingCartIcon },
+    { id: 'features', title: 'Core Features', Icon: BoltIcon },
+    { id: 'admin-controls', title: 'Admin Controls', Icon: ShieldCheckIcon },
+    { id: 'innovation', title: 'Technical Innovation', Icon: BeakerIcon },
+    { id: 'robustness', title: 'On-Chain & DB Robustness', Icon: LinkIcon },
+    { id: 'impact', title: 'Social Impact', Icon: GlobeAltIcon },
+    { id: 'architecture', title: 'System Architecture', Icon: BuildingOfficeIcon },
+    { id: 'faq', title: 'FAQ', Icon: QuestionMarkCircleIcon }
   ];
 
   const renderOverview = () => (
@@ -109,6 +125,91 @@ const Documentation = () => {
             </ul>
           </div>
         </div>
+      </div>
+    </div>
+  );
+
+  const renderAdminControls = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">🛡️ Admin Controls</h2>
+      <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 rounded-lg p-6 border border-emerald-200 dark:border-emerald-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Why an Admin Frontend?</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-3">
+          AgriFinance includes a dedicated <strong>admin dashboard</strong> for operational safety, compliance, and
+          a great user experience. Instead of ad‑hoc scripts or manual DB edits, admins get a <strong>clear, auditable</strong>
+          interface to review sensitive actions and keep the platform healthy.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4 text-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">✅ What Admins Can Do</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Review and approve NFT mint requests</li>
+              <li>• Moderate loan applications and risk flags</li>
+              <li>• Inspect user accounts and resolve issues</li>
+              <li>• Monitor DAO proposals and governance activity</li>
+            </ul>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">🧭 Why This Matters</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• <strong>Safety first</strong>: stop fraud and spam before they hit chain</li>
+              <li>• <strong>Operational clarity</strong>: one source of truth for actions</li>
+              <li>• <strong>Auditability</strong>: every admin action is tracked</li>
+              <li>• <strong>Great UX</strong>: users aren’t blocked by raw on‑chain friction</li>
+            </ul>
+          </div>
+        </div>
+        <p className="text-gray-700 dark:text-gray-300 mt-4">
+          This model is ideal for our use‑case: agriculture involves real people, assets, and risk. A lightweight
+          trust layer with clear admin workflows delivers <strong>speed</strong> for users and <strong>assurance</strong>
+          for lenders and buyers—without compromising decentralization where it matters.
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderRobustness = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">🔗 On‑Chain & Database Robustness</h2>
+      <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-slate-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-slate-200 dark:border-slate-800">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">How the Layers Work Together</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-3">
+          We use a <strong>hybrid architecture</strong>: critical actions are recorded on‑chain for immutability,
+          while rich data and fast queries live in our database. This gives us transparency and performance.
+        </p>
+        <div className="grid md:grid-cols-3 gap-4 text-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">On‑Chain</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Loan actions and repayments</li>
+              <li>• NFT land ownership & marketplace events</li>
+              <li>• DAO proposals and votes</li>
+            </ul>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Database</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• User profiles, wallets, batch metadata</li>
+              <li>• Indexes for fast lookups and analytics</li>
+              <li>• Off‑chain proofs and derived insights</li>
+            </ul>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Sync & Integrity</h4>
+            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+              <li>• Write → confirm → mirror to DB</li>
+              <li>• Reconciliation jobs detect drifts</li>
+              <li>• Idempotent operations and retries</li>
+            </ul>
+          </div>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mt-4 mb-2">Transparent, Upgradeable Governance</h3>
+        <p className="text-gray-700 dark:text-gray-300">
+          Platform policies and parameters are <strong>governed by the DAO</strong>. If the community proposes changes—
+          for example, how transactions are processed, which data is mirrored, or what risk checks apply—
+          successful votes can update these rules. This ensures <strong>trustlessness and transparency</strong>
+          without locking us into early assumptions.
+        </p>
       </div>
     </div>
   );
@@ -551,7 +652,6 @@ const Documentation = () => {
       </h2>
       
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🏆 Hackathon Innovation Highlights</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-3">🚀 Blockchain Innovations</h4>
@@ -954,7 +1054,9 @@ const Documentation = () => {
       case 'lender-guide': return renderLenderGuide();
       case 'buyer-guide': return renderBuyerGuide();
       case 'features': return renderFeatures();
+      case 'admin-controls': return renderAdminControls();
       case 'innovation': return renderInnovation();
+      case 'robustness': return renderRobustness();
       case 'impact': return renderImpact();
       case 'architecture': return renderArchitecture();
       case 'faq': return renderFAQ();
@@ -983,7 +1085,7 @@ const Documentation = () => {
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
-                    <span className="mr-2">{section.icon}</span>
+                    <span className="mr-2 inline-flex items-center"><section.Icon className="h-4 w-4" /></span>
                     {section.title}
                   </button>
                 ))}

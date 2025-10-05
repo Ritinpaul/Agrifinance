@@ -30,11 +30,9 @@ import './App.css';
 
 // Component to handle profile completion modal
 const AppContent = () => {
-  console.log('🎯 AppContent component rendering...');
   
   try {
     const { user, loading } = useAuth();
-    console.log('👤 Auth state:', { user, loading });
     
     const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -173,7 +171,6 @@ class ErrorBoundary extends React.Component {
 }
 
 function App() {
-  console.log('🚀 App component rendering...');
   
   return (
     <ErrorBoundary contextName="ThemeProvider">

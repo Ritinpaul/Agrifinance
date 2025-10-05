@@ -6,35 +6,11 @@ const SupplyChainManagement = () => {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    // Mock data - replace with real API call
-    const mockBatches = [
-      {
-        id: 1,
-        batchId: 'B001',
-        farmer: '0x1234...5678',
-        productType: 'Wheat',
-        quantity: 1000,
-        pricePerUnit: 25,
-        location: 'Punjab, India',
-        certification: 'Organic',
-        status: 'pending',
-        createdAt: new Date('2024-01-15')
-      },
-      {
-        id: 2,
-        batchId: 'B002',
-        farmer: '0x2345...6789',
-        productType: 'Rice',
-        quantity: 800,
-        pricePerUnit: 30,
-        location: 'Haryana, India',
-        certification: 'Fair Trade',
-        status: 'verified',
-        createdAt: new Date('2024-01-10')
-      }
-    ];
-    
-    setBatches(mockBatches);
+    const load = async () => {
+      // Placeholder removed; wait for backend batches API
+      setBatches([]);
+    };
+    load();
   }, []);
 
   const handleVerifyBatch = async (batchId) => {

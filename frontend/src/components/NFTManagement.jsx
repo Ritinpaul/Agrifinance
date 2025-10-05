@@ -46,7 +46,6 @@ const NFTManagement = () => {
     try {
       // Simulate minting
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Minting NFT:', formData);
       loadNFTLands();
     } catch (error) {
       console.error('Error minting NFT:', error);
