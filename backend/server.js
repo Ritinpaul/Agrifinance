@@ -17,23 +17,34 @@ if (process.env.VERBOSE_LOGS !== 'true') {
   console.log = function noop() {};
 }
 
-// Middleware - Allow both user and admin frontends
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    process.env.ADMIN_FRONTEND_URL || 'http://localhost:5175'
-  ],
-  credentials: true
-}));
+// Robust CORS for production and previews
+const explicitAllowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:5175'
+].filter(Boolean);
 
-// Add security headers for CSP
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  next();
-});
+const allowedOriginPatterns = [
+  /\.vercel\.app$/i,          // allow Vercel preview & prod subdomains
+  /\.onrender\.com$/i         // allow our own Render domain
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // No origin (e.g. curl, server-to-server) -> allow
+    if (!origin) return callback(null, true);
+    if (explicitAllowedOrigins.includes(origin)) return callback(null, true);
+    if (allowedOriginPatterns.some((re) => re.test(origin))) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: 'Content-Type, Authorization'
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
