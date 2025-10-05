@@ -67,10 +67,10 @@ class BlockchainService {
     try {
       // Initialize provider based on environment
       if (process.env.NODE_ENV === 'production') {
-        this.provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+        this.provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL || 'https://rpc-amoy.polygon.technology');
       } else {
         // Use Polygon Amoy testnet for development
-        this.provider = new ethers.JsonRpcProvider('https://rpc-amoy.polygon.technology');
+        this.provider = new ethers.providers.JsonRpcProvider('https://rpc-amoy.polygon.technology');
       }
       
       console.log('🔗 Blockchain provider initialized');
@@ -488,10 +488,10 @@ class BlockchainService {
         console.log(`🔄 Token Transfer event detected: ${from} -> ${to}, amount: ${value.toString()}`);
         
         // Sync affected wallets
-        if (from !== ethers.ZeroAddress) {
+        if (from !== ethers.constants.AddressZero) {
           await this.syncWalletByAddress(from);
         }
-        if (to !== ethers.ZeroAddress) {
+        if (to !== ethers.constants.AddressZero) {
           await this.syncWalletByAddress(to);
         }
       });
