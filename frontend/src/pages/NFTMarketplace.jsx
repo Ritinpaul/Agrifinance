@@ -80,16 +80,68 @@ const NFTMarketplace = () => {
 
   const handlePurchase = async (nftId) => {
     if (!user?.id) {
-      alert('Please sign in to purchase NFTs');
+      toast.error('Please sign in to purchase NFTs');
+      return;
+    }
+
+    // Find the NFT to purchase
+    const nftToPurchase = allNfts.find(nft => nft.id === nftId);
+    if (!nftToPurchase) {
+      toast.error('NFT not found');
+      return;
+    }
+
+    if (nftToPurchase.status !== 'minted') {
+      toast.error('NFT is not available for purchase');
+      return;
+    }
+
+    // Check if user has an in-app wallet
+    let userWallet;
+    try {
+      const walletResult = await apiClient.getWallet();
+      if (!walletResult.data || !walletResult.data.wallet) {
+        toast.error('No in-app wallet found. Please create a wallet first.');
+        return;
+      }
+      userWallet = walletResult.data.wallet;
+    } catch (error) {
+      toast.error('Failed to check wallet status');
+      return;
+    }
+
+    // Check if user has sufficient balance
+    const nftPriceWei = nftToPurchase.price_wei || '0';
+    const userBalanceWei = userWallet.balance_wei || '0';
+    
+    if (BigInt(userBalanceWei) < BigInt(nftPriceWei)) {
+      const nftPrice = ethers.formatUnits(nftPriceWei, 6);
+      const userBalance = ethers.formatUnits(userBalanceWei, 6);
+      toast.error(`Insufficient balance. NFT costs ${nftPrice} KRSI, you have ${userBalance} KRSI`);
       return;
     }
 
     setPurchasing(prev => ({ ...prev, [nftId]: true }));
     try {
-      // Simulate purchase
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Execute real NFT purchase
+      const purchaseResult = await apiClient.purchaseNFT({
+        nftId: nftId,
+        buyerId: user.id,
+        priceWei: nftPriceWei
+      });
+
+      if (purchaseResult.error) {
+        throw new Error(purchaseResult.error);
+      }
+
+      toast.success('🎉 NFT purchased successfully!');
+      
+      // Refresh NFT list to show updated ownership
+      await loadNFTs();
+      
     } catch (error) {
       console.error('Error purchasing NFT:', error);
+      toast.error('Failed to purchase NFT: ' + error.message);
     } finally {
       setPurchasing(prev => ({ ...prev, [nftId]: false }));
     }
@@ -318,15 +370,15 @@ const NFTMarketplace = () => {
                       
                       <button
                         onClick={() => handlePurchase(nft.id)}
-                        disabled={purchasing[nft.id] || !isConnected || nft.status === 'draft'}
+                        disabled={purchasing[nft.id] || !user?.id || nft.status === 'draft'}
                         className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
                       >
                         {purchasing[nft.id] 
                           ? 'Purchasing...' 
                           : nft.status === 'draft'
                           ? 'Pending Approval'
-                          : !isConnected
-                          ? 'Connect Wallet'
+                          : !user?.id
+                          ? 'Sign In Required'
                           : 'Buy NFT'
                         }
                       </button>

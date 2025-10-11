@@ -45,8 +45,8 @@ const TokenFaucet = ({ className = "" }) => {
   };
 
   const claimTokens = async () => {
-    if (!account || !krishiTokenContract) {
-      toast.error('Please connect your wallet first');
+    if (!user?.id) {
+      toast.error('Please sign in first');
       return;
     }
 
@@ -55,7 +55,7 @@ const TokenFaucet = ({ className = "" }) => {
       // Get current wallet balance
       const walletResult = await apiClient.getWallet();
       if (!walletResult.data || !walletResult.data.wallet) {
-        throw new Error('No wallet found');
+        throw new Error('No in-app wallet found. Please create a wallet first.');
       }
 
       const currentBalanceWei = walletResult.data.wallet.balance_wei || '0';
@@ -84,8 +84,8 @@ const TokenFaucet = ({ className = "" }) => {
   };
 
   const depositToInAppWallet = async () => {
-    if (!account || !krishiTokenContract) {
-      toast.error('Please connect your wallet first');
+    if (!user?.id) {
+      toast.error('Please sign in first');
       return;
     }
 
@@ -94,7 +94,7 @@ const TokenFaucet = ({ className = "" }) => {
       // Get current wallet balance
       const walletResult = await apiClient.getWallet();
       if (!walletResult.data || !walletResult.data.wallet) {
-        throw new Error('No wallet found');
+        throw new Error('No in-app wallet found. Please create a wallet first.');
       }
 
       const currentBalanceWei = walletResult.data.wallet.balance_wei || '0';
@@ -170,7 +170,7 @@ const TokenFaucet = ({ className = "" }) => {
         <div className="space-y-3">
           <button
             onClick={claimTokens}
-            disabled={loading || !canClaim() || !account}
+            disabled={loading || !canClaim() || !user?.id}
             className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
           >
             {loading ? 'Claiming...' : `Claim ${faucetData.maxClaimAmount} KRSI`}
@@ -178,7 +178,7 @@ const TokenFaucet = ({ className = "" }) => {
 
           <button
             onClick={depositToInAppWallet}
-            disabled={depositLoading || !account}
+            disabled={depositLoading || !user?.id}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
           >
             {depositLoading ? 'Depositing...' : 'Deposit to In-App Wallet'}
@@ -191,9 +191,9 @@ const TokenFaucet = ({ className = "" }) => {
           </div>
         )}
 
-        {!account && (
+        {!user?.id && (
           <div className="text-center text-sm text-yellow-600 dark:text-yellow-400">
-            Connect your wallet to claim tokens
+            Please sign in to use the token faucet
           </div>
         )}
       </div>
